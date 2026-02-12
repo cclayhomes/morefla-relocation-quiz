@@ -56,7 +56,7 @@ export function ResultsCard({ rankedMatches, scoreBreakdown, leadData, insights,
       <div className="rounded-2xl bg-white p-6 shadow-card">
         <h3 className="text-lg font-semibold text-slate-900">Area-specific insights from your answers</h3>
         <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-slate-700">
-          {insights.slice(0, 4).map((insight) => (
+          {(insights.length ? insights : ['Your ranking balanced commute, lifestyle, and practical fit across all quiz answers.']).slice(0, 6).map((insight) => (
             <li key={insight}>{insight}</li>
           ))}
         </ul>
