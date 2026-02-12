@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import logoUrl from './assets/more-fla-logo.svg';
 import { LeadCaptureForm } from './components/LeadCaptureForm';
 import { LandingPage } from './components/LandingPage';
