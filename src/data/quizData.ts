@@ -57,83 +57,42 @@ export const areaProfiles: Record<AreaKey, AreaProfile> = {
 };
 
 export const questions: QuizQuestion[] = [
-  { id: 1, prompt: 'Do you need good schools?', options: [
-    { text: 'No kids or kids are grown', value: 'noKids', insight: 'Schools are not a deciding factor for your move.' },
-    { text: 'Yes, elementary age focus', value: 'elem', insight: 'You need strong elementary school zones.' },
-    { text: 'Yes, middle/high school focus', value: 'middleHigh', insight: 'You want areas with strong middle and high school options.' },
-    { text: 'Yes, all ages matter', value: 'allAges', insight: 'You are prioritizing excellent school pipelines across all grades.' }
+  { id: 1, prompt: 'What feels most like your ideal Florida life?', options: [
+    { text: 'Beach-first/coastal', value: 'beach', insight: 'You are prioritizing water access and a coastal lifestyle.' },
+    { text: 'Theme parks + attractions close', value: 'themeparks', insight: 'Being near attractions and entertainment is a top priority.' },
+    { text: 'City energy - events, sports, nightlife', value: 'city', insight: 'You want vibrant areas with walkability, events, and nightlife energy.' },
+    { text: 'Suburban family amenities - parks, trails, community', value: 'suburban', insight: 'You are focused on family-friendly neighborhoods with trails and community amenities.' },
+    { text: 'More space / value / quieter', value: 'spacevalue', insight: 'You want value, space, and quieter neighborhoods over busy hubs.' }
   ] },
-  { id: 2, prompt: 'What matters most for schools?', options: [
-    { text: 'Top academics and test scores', value: 'academics', insight: 'Academic performance and elite school ratings are top priorities.' },
-    { text: 'Strong sports and athletics programs', value: 'sports', insight: 'Athletics programs and extracurricular strength matter most.' },
-    { text: 'Private school options nearby', value: 'private', insight: 'Access to private school options is key for your family.' },
-    { text: 'Just need solid public schools', value: 'solid', insight: 'You want consistently solid public-school coverage.' }
+  { id: 2, prompt: 'Where do you expect to be most often during the week?', options: [
+    { text: 'Tampa side', value: 'tampa', insight: 'You are optimizing for Tampa-side weekly access.' },
+    { text: 'St. Pete/Clearwater side', value: 'pinellas', insight: 'You are prioritizing Pinellas County access and coastal convenience.' },
+    { text: 'Sarasota/Bradenton side', value: 'sarasota', insight: 'You are focused on Sarasota-Bradenton access during the week.' },
+    { text: 'Orlando side', value: 'orlando', insight: 'You are optimizing for Orlando-side access and commute convenience.' },
+    { text: 'Fully remote / hybrid', value: 'remote', insight: 'Your work setup gives flexibility, so lifestyle fit carries more weight.' }
   ] },
-  { id: 3, prompt: 'Where will you or your household be working?', options: [
-    { text: 'Orlando area', value: 'orlando', insight: 'You are optimizing for Orlando-area job centers.' },
-    { text: 'Tampa area', value: 'tampa', insight: 'You are optimizing for Tampa-area job centers.' },
-    { text: 'Between both (I-4 corridor)', value: 'i4', insight: 'You need practical access to both metros via I-4.' },
-    { text: "Remote/retired/doesn't matter", value: 'remote', insight: 'Commute constraints are minimal, so lifestyle fit leads.' }
+  { id: 3, prompt: "What's your max one-way commute you'd actually do?", options: [
+    { text: 'Under 25 minutes', value: 'under25', insight: 'You need short day-to-day commute times.' },
+    { text: '25-45 minutes', value: '25to45' },
+    { text: '45-75 minutes', value: '45to75' },
+    { text: 'Long drives a few days/week is fine', value: 'longok' }
   ] },
-  { id: 4, prompt: 'How long of a commute is acceptable?', options: [
-    { text: 'Under 20 minutes', value: 'under20', insight: 'You need a short day-to-day commute.' },
-    { text: '20-35 minutes is fine', value: '20to35' },
-    { text: '35-45 minutes is okay', value: '35to45' },
-    { text: "Commute doesn't matter", value: 'noLimit' }
+  { id: 4, prompt: "What's your comfortable purchase range?", options: [
+    { text: 'Under $350k', value: 'under350', budgetValue: 'under300' },
+    { text: '$350k-$500k', value: '350to500', budgetValue: '400to500' },
+    { text: '$500k-$700k', value: '500to700', budgetValue: '500to650' },
+    { text: '$700k-$1M', value: '700to1m', budgetValue: '650to800' },
+    { text: '$1M+', value: '1mplus', budgetValue: '800plus' }
   ] },
-  { id: 5, prompt: 'How often will friends and family visit you?', options: [
-    { text: 'Constantly - need guest space and attractions nearby', value: 'constantly', insight: 'You want visiting-friendly areas with attractions and convenience.' },
-    { text: 'A few times a year', value: 'few' },
-    { text: 'Rarely', value: 'rarely' }
+  { id: 5, prompt: 'How important are strong public schools?', options: [
+    { text: 'Must-have', value: 'must', insight: 'Top public school strength is a must-have in your relocation decision.' },
+    { text: 'Nice-to-have', value: 'nice', insight: 'Strong schools are beneficial, but not your only deciding factor.' },
+    { text: 'Not a factor', value: 'notafactor', insight: 'You are not weighting school ratings heavily in this move.' }
   ] },
-  { id: 6, prompt: "What's your ideal weekend activity?", options: [
-    { text: 'Boating, fishing, or water sports', value: 'water', insight: 'Water access and lake/coastal recreation are a major lifestyle fit.' },
-    { text: 'Golf and country club lifestyle', value: 'golf' },
-    { text: 'Downtown dining, shops, and nightlife', value: 'downtown' },
-    { text: 'Farmers markets and community events', value: 'markets' },
-    { text: 'Hiking, trails, and nature', value: 'trails' },
-    { text: 'Relaxing at home - peace and quiet', value: 'quiet', insight: 'Low-noise communities with extra breathing room are a priority.' }
-  ] },
-  { id: 7, prompt: 'What type of neighborhood appeals to you?', options: [
-    { text: 'Brand new, modern, and growing', value: 'new' },
-    { text: 'Established with character and charm', value: 'established' },
-    { text: 'Mix of both', value: 'mix' },
-    { text: 'Whatever offers the best value', value: 'value', insight: 'You are price-sensitive and open to emerging value areas.' }
-  ] },
-  { id: 8, prompt: 'How do you feel about HOAs?', options: [
-    { text: 'Want full amenities - pools, clubhouse, events', value: 'full' },
-    { text: 'Light HOA with basic maintenance is fine', value: 'light' },
-    { text: 'Prefer no HOA - want freedom', value: 'none' },
-    { text: "Doesn't matter to me", value: 'doesntMatter' }
-  ] },
-  { id: 9, prompt: 'How important is airport access?', options: [
-    { text: 'Very important - I travel frequently for work', value: 'very', insight: 'Fast airport access is an essential convenience for your move.' },
-    { text: 'Somewhat - a few trips per year', value: 'somewhat' },
-    { text: 'Not important', value: 'not' }
-  ] },
-  { id: 10, prompt: "What's your dining and shopping preference?", options: [
-    { text: 'Big chains and convenient shopping centers', value: 'chains' },
-    { text: 'Local unique restaurants and boutiques', value: 'local' },
-    { text: 'Good mix of both', value: 'mixed' }
-  ] },
-  { id: 11, prompt: "What's your maximum budget?", options: [
-    { text: 'Under $300K', value: 'under300', budgetValue: 'under300' },
-    { text: '$300K - $400K', value: '300to400', budgetValue: '300to400' },
-    { text: '$400K - $500K', value: '400to500', budgetValue: '400to500' },
-    { text: '$500K - $650K', value: '500to650', budgetValue: '500to650' },
-    { text: '$650K - $800K', value: '650to800', budgetValue: '650to800' },
-    { text: '$800K+', value: '800plus', budgetValue: '800plus' }
-  ] },
-  { id: 12, prompt: 'What minimum home size do you need?', options: [
-    { text: 'At least 1,500 sq ft', value: '1500', sizeValue: 1500 },
-    { text: 'At least 2,000 sq ft', value: '2000', sizeValue: 2000 },
-    { text: 'At least 2,500 sq ft', value: '2500', sizeValue: 2500 },
-    { text: 'At least 3,000 sq ft', value: '3000', sizeValue: 3000 }
-  ] },
-  { id: 13, prompt: 'New construction or resale?', options: [
-    { text: 'New construction only', value: 'new', constructionValue: 'new' },
-    { text: 'Resale/established only', value: 'resale', constructionValue: 'resale' },
-    { text: 'Either is fine', value: 'either', constructionValue: 'either' }
+  { id: 6, prompt: 'How do you feel about HOA/CDD fees for amenities?', options: [
+    { text: 'Love amenities - fees are okay', value: 'amenities', insight: 'You are comfortable paying for amenity-rich communities.' },
+    { text: 'Moderate fees are fine', value: 'moderate' },
+    { text: 'Prefer low/no fees', value: 'lowfees', insight: 'You prefer lower-fee neighborhoods with fewer ongoing dues.' }
   ] }
 ];
 
