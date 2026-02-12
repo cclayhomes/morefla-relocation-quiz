@@ -31,7 +31,7 @@ export function LandingPage({ onStartQuiz }: LandingPageProps) {
             Find Your Best-Fit Florida Area in 60 Seconds
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 md:text-lg">
-            Answer 6 quick questions and get your Top 3 matches for Central Florida relocation.
+            Answer 8 quick questions and get your Top 3 matches for Central Florida relocation.
           </p>
 
           {/* Video embed placeholder */}
