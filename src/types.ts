@@ -43,6 +43,7 @@ export type ConstructionPreference = 'new' | 'resale' | 'either';
 
 export interface QuizOption {
   text: string;
+  subLabel?: string;
   value: string;
   budgetValue?: BudgetBracket;
   sizeValue?: SizeNeed;
