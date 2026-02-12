@@ -57,92 +57,55 @@ export const areaProfiles: Record<AreaKey, AreaProfile> = {
 };
 
 export const questions: QuizQuestion[] = [
-  { id: 1, prompt: 'Do you need good schools?', options: [
-    { text: 'No kids or kids are grown', value: 'noKids', insight: 'Schools are not a deciding factor for your move.' },
-    { text: 'Yes, elementary age focus', value: 'elem', insight: 'You need strong elementary school zones.' },
-    { text: 'Yes, middle/high school focus', value: 'middleHigh', insight: 'You want areas with strong middle and high school options.' },
-    { text: 'Yes, all ages matter', value: 'allAges', insight: 'You are prioritizing excellent school pipelines across all grades.' }
+  { id: 1, prompt: 'Pick your ideal Florida weekend', options: [
+    { text: 'Beach mornings + waterfront dining', subLabel: 'Coastal lifestyle is your priority', value: 'beach', insight: 'Beach and coastal recreation are a major lifestyle driver.' },
+    { text: 'Theme parks and attractions', subLabel: 'Disney/Universal access matters', value: 'themeparks', insight: 'Attractions and theme-park access are central to your location fit.' },
+    { text: 'Downtown events + pro sports', subLabel: 'City energy and nightlife', value: 'downtown', insight: 'Urban lifestyle with walkability and dining is a priority.' },
+    { text: 'Backyard BBQ + youth sports', subLabel: 'Family suburban amenities', value: 'familysuburb', insight: 'Family-oriented neighborhoods with sports and community events are key.' },
+    { text: 'Quiet space + value', subLabel: 'More home for the money', value: 'quiet', insight: 'You value space, affordability, and a quieter pace.' }
   ] },
-  { id: 2, prompt: 'What matters most for schools?', options: [
-    { text: 'Top academics and test scores', value: 'academics', insight: 'Academic performance and elite school ratings are top priorities.' },
-    { text: 'Strong sports and athletics programs', value: 'sports', insight: 'Athletics programs and extracurricular strength matter most.' },
-    { text: 'Private school options nearby', value: 'private', insight: 'Access to private school options is key for your family.' },
-    { text: 'Just need solid public schools', value: 'solid', insight: 'You want consistently solid public-school coverage.' }
+  { id: 2, prompt: 'Where will you be most often during the week?', options: [
+    { text: 'Tampa side', subLabel: 'Tampa metro job centers', value: 'tampa', insight: 'You are optimizing for Tampa-area job centers.' },
+    { text: 'Orlando side', subLabel: 'Orlando metro job centers', value: 'orlando', insight: 'You are optimizing for Orlando-area job centers.' },
+    { text: 'Between both (I-4 corridor)', subLabel: 'Need access to both metros', value: 'i4', insight: 'You need practical access to both metros via I-4.' },
+    { text: 'Remote / hybrid', subLabel: 'Lifestyle fit matters more than commute', value: 'remote', insight: 'Commute constraints are minimal, so lifestyle fit leads.' }
   ] },
-  { id: 3, prompt: 'Where will you or your household be working?', options: [
-    { text: 'Orlando area', value: 'orlando', insight: 'You are optimizing for Orlando-area job centers.' },
-    { text: 'Tampa area', value: 'tampa', insight: 'You are optimizing for Tampa-area job centers.' },
-    { text: 'Between both (I-4 corridor)', value: 'i4', insight: 'You need practical access to both metros via I-4.' },
-    { text: "Remote/retired/doesn't matter", value: 'remote', insight: 'Commute constraints are minimal, so lifestyle fit leads.' }
+  { id: 3, prompt: "On a normal weekday, what's the max drive you'd tolerate during rush hour?", options: [
+    { text: '15-25 minutes max', subLabel: 'I want life close and simple', value: 'under25', insight: 'You need a short day-to-day commute.' },
+    { text: '25-40 minutes', subLabel: 'I can handle some traffic', value: '25to40' },
+    { text: "40-60 minutes (if it's worth it)", subLabel: "I'll drive for the right home/lifestyle", value: '40to60' },
+    { text: "I'm remote (commute doesn't matter)", subLabel: 'Flexibility opens more options', value: 'noLimit' }
   ] },
-  { id: 4, prompt: 'How long of a commute is acceptable?', options: [
-    { text: 'Under 20 minutes', value: 'under20', insight: 'You need a short day-to-day commute.' },
-    { text: '20-35 minutes is fine', value: '20to35' },
-    { text: '35-45 minutes is okay', value: '35to45' },
-    { text: "Commute doesn't matter", value: 'noLimit' }
+  { id: 4, prompt: 'How do you feel about living near the coast?', options: [
+    { text: 'I want to be near beaches no matter what', subLabel: 'Coastal living is non-negotiable', value: 'high', insight: 'Coastal proximity is a top priority for your lifestyle.' },
+    { text: 'I want access but not right on the coast', subLabel: 'Beach trips yes, flood zone no', value: 'medium' },
+    { text: 'I prefer inland for insurance + storms', subLabel: 'Lower risk and lower costs', value: 'low', insight: 'You prefer inland ecosystems with less coastal exposure.' },
+    { text: "Doesn't matter", subLabel: 'Not a deciding factor', value: 'neutral' }
   ] },
-  { id: 5, prompt: 'How important are theme parks/major attractions to your lifestyle?', options: [
-    { text: 'Must-have for regular use or guests', value: 'mustHave', insight: 'Attractions and theme-park access are central to your location fit.' },
-    { text: 'Nice bonus, but not required', value: 'niceToHave' },
-    { text: 'Not important', value: 'notImportant' }
+  { id: 5, prompt: 'How important is being near Disney/Universal?', options: [
+    { text: 'Must be close', subLabel: 'Annual passes, guest visits, or work nearby', value: 'mustHave', insight: 'Theme park proximity is essential for your lifestyle.' },
+    { text: 'Nice to have', subLabel: 'Fun for occasional visits', value: 'niceToHave' },
+    { text: "Doesn't matter", subLabel: 'Not a factor in my decision', value: 'notImportant' },
+    { text: 'I prefer to avoid tourist zones', subLabel: 'Less traffic and tourist crowds', value: 'avoidTourist', insight: 'You prefer areas away from heavy tourist corridors.' }
   ] },
-  { id: 6, prompt: "What's your ideal weekend activity?", options: [
-    { text: 'Boating, fishing, or water sports', value: 'water', insight: 'Water access and lake/coastal recreation are a major lifestyle fit.' },
-    { text: 'Golf and country club lifestyle', value: 'golf' },
-    { text: 'Downtown dining, shops, and nightlife', value: 'downtown' },
-    { text: 'Farmers markets and community events', value: 'markets' },
-    { text: 'Hiking, trails, and nature', value: 'trails' },
-    { text: 'Relaxing at home - peace and quiet', value: 'quiet', insight: 'Low-noise communities with extra breathing room are a priority.' }
+  { id: 6, prompt: 'How important are strong public schools?', options: [
+    { text: 'Must-have', subLabel: 'A-rated districts are non-negotiable', value: 'mustHave', insight: 'Top-rated school zones are essential.' },
+    { text: 'Nice-to-have', subLabel: "Good schools matter but aren't the only factor", value: 'niceToHave' },
+    { text: 'Not a factor', subLabel: 'No kids or kids are grown', value: 'noKids', insight: 'Schools are not a deciding factor for your move.' }
   ] },
-  { id: 7, prompt: 'What type of neighborhood appeals to you?', options: [
-    { text: 'Brand new, modern, and growing', value: 'new' },
-    { text: 'Established with character and charm', value: 'established' },
-    { text: 'Mix of both', value: 'mix' },
-    { text: 'Whatever offers the best value', value: 'value', insight: 'You are price-sensitive and open to emerging value areas.' }
+  { id: 7, prompt: "What's your comfortable purchase range?", options: [
+    { text: 'Under $300K', subLabel: 'Value-focused new construction', value: 'under300', budgetValue: 'under300' },
+    { text: '$300K - $400K', subLabel: 'Strong options across multiple areas', value: '300to400', budgetValue: '300to400' },
+    { text: '$400K - $500K', subLabel: 'Move-up communities and suburbs', value: '400to500', budgetValue: '400to500' },
+    { text: '$500K - $650K', subLabel: 'Master-planned and premium suburbs', value: '500to650', budgetValue: '500to650' },
+    { text: '$650K - $800K', subLabel: 'Luxury pockets and top communities', value: '650to800', budgetValue: '650to800' },
+    { text: '$800K+', subLabel: 'High-end and custom options', value: '800plus', budgetValue: '800plus' }
   ] },
-  { id: 8, prompt: 'How do you feel about HOAs?', options: [
-    { text: 'Want full amenities - pools, clubhouse, events', value: 'full' },
-    { text: 'Light HOA with basic maintenance is fine', value: 'light' },
-    { text: 'Prefer no HOA - want freedom', value: 'none' },
-    { text: "Doesn't matter to me", value: 'doesntMatter' }
-  ] },
-  { id: 9, prompt: 'How important is airport access?', options: [
-    { text: 'Very important - I travel frequently for work', value: 'very', insight: 'Fast airport access is an essential convenience for your move.' },
-    { text: 'Somewhat - a few trips per year', value: 'somewhat' },
-    { text: 'Not important', value: 'not' }
-  ] },
-  { id: 10, prompt: "What's your dining and shopping preference?", options: [
-    { text: 'Big chains and convenient shopping centers', value: 'chains' },
-    { text: 'Local unique restaurants and boutiques', value: 'local' },
-    { text: 'Good mix of both', value: 'mixed' }
-  ] },
-  { id: 11, prompt: "What's your maximum budget?", options: [
-    { text: 'Under $300K', value: 'under300', budgetValue: 'under300' },
-    { text: '$300K - $400K', value: '300to400', budgetValue: '300to400' },
-    { text: '$400K - $500K', value: '400to500', budgetValue: '400to500' },
-    { text: '$500K - $650K', value: '500to650', budgetValue: '500to650' },
-    { text: '$650K - $800K', value: '650to800', budgetValue: '650to800' },
-    { text: '$800K+', value: '800plus', budgetValue: '800plus' }
-  ] },
-  { id: 12, prompt: 'What minimum home size do you need?', options: [
-    { text: 'At least 1,500 sq ft', value: '1500', sizeValue: 1500 },
-    { text: 'At least 2,000 sq ft', value: '2000', sizeValue: 2000 },
-    { text: 'At least 2,500 sq ft', value: '2500', sizeValue: 2500 },
-    { text: 'At least 3,000 sq ft', value: '3000', sizeValue: 3000 }
-  ] },
-  { id: 13, prompt: 'New construction or resale?', options: [
-    { text: 'New construction only', value: 'new', constructionValue: 'new' },
-    { text: 'Resale/established only', value: 'resale', constructionValue: 'resale' },
-    { text: 'Either is fine', value: 'either', constructionValue: 'either' }
-  ] },
-  { id: 14, prompt: 'How comfortable are you with coastal hurricane exposure?', options: [
-    { text: 'Very comfortable with coastal living', value: 'high' },
-    { text: 'Some comfort, but prefer balance', value: 'medium' },
-    { text: 'Prefer inland / lower coastal risk', value: 'low', insight: 'You prefer inland ecosystems with less coastal exposure.' }
-  ] },
-  { id: 15, prompt: 'How open are you to exploring outside your primary metro?', options: [
-    { text: 'Open to exploring anywhere in Central/West Florida', value: 'openAnywhere' },
-    { text: 'Prefer one primary ecosystem only', value: 'primaryOnly' }
+  { id: 8, prompt: 'How wide should we search to find your best fit?', options: [
+    { text: 'Keep it close to the major hubs', subLabel: 'Stay tight to Tampa/Orlando core areas', value: 'hubsOnly', insight: 'You want to stay close to major metro cores.' },
+    { text: 'Open to suburbs if the fit is right', subLabel: 'Show me strong nearby options', value: 'openSuburbs' },
+    { text: "Show the best value/growth even if it's farther", subLabel: "I'll trade distance for space/price", value: 'openWide', insight: "You're open to value-forward areas farther from metro cores." },
+    { text: "Surprise me - I'm open to anything", subLabel: 'Show my best fit anywhere', value: 'openAnywhere' }
   ] }
 ];
 
