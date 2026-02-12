@@ -16,10 +16,30 @@ const initialState: LeadFormData = {
 
 export function LeadCaptureForm({ onSubmit }: LeadCaptureFormProps) {
   const [formState, setFormState] = useState<LeadFormData>(initialState);
+  const [showValidationMessage, setShowValidationMessage] = useState(false);
+
+  const isFormValid =
+    formState.firstName.trim().length > 1 &&
+    formState.lastName.trim().length > 1 &&
+    formState.email.includes('@') &&
+    formState.phone.trim().length >= 10 &&
+    formState.timeline.length > 0;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSubmit(formState);
+
+    if (!isFormValid) {
+      setShowValidationMessage(true);
+      return;
+    }
+
+    onSubmit({
+      ...formState,
+      firstName: formState.firstName.trim(),
+      lastName: formState.lastName.trim(),
+      email: formState.email.trim(),
+      phone: formState.phone.trim()
+    });
   };
 
   return (
@@ -62,6 +82,7 @@ export function LeadCaptureForm({ onSubmit }: LeadCaptureFormProps) {
           required
           type="tel"
           placeholder="(555) 555-5555"
+          pattern="[0-9()\-\s+]{10,}"
           value={formState.phone}
           onChange={(event) => setFormState((current) => ({ ...current, phone: event.target.value }))}
           className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none ring-lagoon focus:ring"
@@ -89,13 +110,16 @@ export function LeadCaptureForm({ onSubmit }: LeadCaptureFormProps) {
           onChange={(event) => setFormState((current) => ({ ...current, wantsCommunityInfo: event.target.checked }))}
           className="mt-0.5 h-4 w-4 rounded border-slate-300 text-lagoon focus:ring-lagoon"
         />
-        <span>Yes, send me info on the best communities in my matched area(s)</span>
+        <span>Yes, I'd like info on the best communities in my top areas.</span>
       </label>
+      {showValidationMessage && !isFormValid && (
+        <p className="text-sm font-medium text-red-600">Please complete all fields with valid contact details before continuing.</p>
+      )}
       <button
         type="submit"
         className="w-full rounded-xl bg-citrus px-5 py-3 font-semibold text-slate-900 transition hover:brightness-105"
       >
-        See My Top Florida Matches
+        See My Top 3 Florida Matches
       </button>
     </form>
   );

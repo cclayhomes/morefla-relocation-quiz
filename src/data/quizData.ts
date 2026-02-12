@@ -1,220 +1,172 @@
-import { AreaKey, AreaProfile, QuizQuestion } from '../types';
+import { AreaKey, AreaProfile, BudgetBracket, QuizQuestion, ScoreTag, SizeNeed } from '../types';
 
 export const areaProfiles: Record<AreaKey, AreaProfile> = {
-  wesleyChapel: {
-    key: 'wesleyChapel',
-    title: 'Wesley Chapel + New Tampa',
-    subtitle: 'Fast-growing master-planned communities north of Tampa.',
-    vibe: 'Family-friendly neighborhoods, top schools, and abundant newer homes with suburban convenience.',
-    callout: 'Great fit for households wanting modern communities near Wiregrass and Tampa Premium Outlets.',
-    highlights: ['A-rated school options in many zones', 'Amenity-rich master-planned communities', 'Easy access to Tampa job hubs via I-75']
-  },
-  southTampa: {
-    key: 'southTampa',
-    title: 'South Tampa + Brandon + Riverview',
-    subtitle: 'Urban convenience paired with affordable suburban options.',
-    vibe: 'Choose walkable, upscale city living or value-oriented neighborhoods with practical commutes.',
-    callout: 'Ideal if you want Tampa access, MacDill proximity, and lifestyle flexibility by budget.',
-    highlights: ['Close to downtown Tampa and major employers', 'Blend of city, suburban, and waterfront access', 'Solid value pockets in Brandon and Riverview']
-  },
-  stPete: {
-    key: 'stPete',
-    title: 'St. Petersburg + Clearwater',
-    subtitle: 'Gulf coast energy with vibrant culture and world-class beaches.',
-    vibe: 'Urban waterfront neighborhoods, arts districts, breweries, and sunset-driven beach life.',
-    callout: 'Perfect for buyers who prioritize coastal living with walkable downtown amenities.',
-    highlights: ['Top beach access and waterfront lifestyle', 'Strong arts, dining, and nightlife scene', 'Mix of historic charm and modern condo options']
-  },
-  polkCounty: {
-    key: 'polkCounty',
-    title: 'Lakeland + Winter Haven',
-    subtitle: 'Affordable Central Florida living between Tampa and Orlando.',
-    vibe: 'Small-city charm, larger lots, and practical pricing with easy I-4 positioning.',
-    callout: 'A smart central-location play for remote workers and value-focused buyers.',
-    highlights: ['Lower average home prices and more space', 'Growing downtown districts and local events', 'Convenient midpoint for Tampa/Orlando access']
-  },
-  lakewoodRanch: {
-    key: 'lakewoodRanch',
-    title: 'Lakewood Ranch',
-    subtitle: 'Premier master-planned living near Sarasota and the Gulf.',
-    vibe: 'Upscale new construction, resort-style amenities, and strong schools in a polished setting.',
-    callout: 'Excellent for buyers wanting elevated suburban-coastal living with turnkey neighborhoods.',
-    highlights: ['Highly amenitized planned communities', 'Consistently strong school demand', 'Quick routes to Sarasota culture and beaches']
-  },
-  sarasota: {
-    key: 'sarasota',
-    title: 'Sarasota + Bradenton',
-    subtitle: 'Coastal culture, arts, and beach-town lifestyle.',
-    vibe: 'Historic charm and newer builds blend with dining, arts, and Gulf waterfront living.',
-    callout: 'Great for lifestyle buyers seeking Siesta Key, Anna Maria, and cultural depth.',
-    highlights: ['Access to premier Gulf beaches', 'Strong arts and dining scenes', 'Diverse housing from character homes to new builds']
-  },
-  winterGarden: {
-    key: 'winterGarden',
-    title: 'Winter Garden + Horizon West',
-    subtitle: 'Master-planned convenience with a family-forward feel.',
-    vibe: 'Walkable districts, newer homes, and easy Disney-area access.',
-    callout: 'Great blend of neighborhoods, schools, and lifestyle amenities.',
-    highlights: ['Historic downtown events and markets', 'Modern communities with parks and trails', 'Strong fit for active households']
-  },
-  lakeNona: {
-    key: 'lakeNona',
-    title: 'Lake Nona',
-    subtitle: 'Innovation corridor energy with upscale modern living.',
-    vibe: 'Tech-forward, polished, and highly connected to Orlando hotspots.',
-    callout: 'Ideal if you want newer construction and a sleek lifestyle hub.',
-    highlights: ['Medical City and business growth', 'Dining, fitness, and recreation clusters', 'Convenient airport and highway access']
-  },
-  clermont: {
-    key: 'clermont',
-    title: 'Clermont + South Lake',
-    subtitle: 'Space, nature, and value with a laid-back pace.',
-    vibe: 'Rolling hills, lakes, and room to breathe without losing convenience.',
-    callout: 'Perfect for buyers who want space and outdoor living.',
-    highlights: ['Larger lots and scenic views', 'Strong sense of community', 'Appealing value relative to core Orlando']
-  },
-  kissimmee: {
-    key: 'kissimmee',
-    title: 'Kissimmee + St. Cloud + Davenport',
-    subtitle: 'Affordable Orlando-area access near Disney growth corridors.',
-    vibe: 'Fast-growing new communities with practical prices for first-time and family buyers.',
-    callout: 'Strong option for budget-conscious buyers who still want major-attraction access.',
-    highlights: ['Plentiful newer construction at approachable prices', 'Convenient to theme parks and hospitality jobs', 'Family-friendly neighborhoods with steady growth']
-  },
-  winterPark: {
-    key: 'winterPark',
-    title: 'Winter Park + Maitland',
-    subtitle: 'Established charm with upscale character and culture.',
-    vibe: 'Tree-lined streets, boutique districts, and timeless architecture.',
-    callout: 'Best for buyers seeking classic charm and central location.',
-    highlights: ['Dining, arts, and shopping destinations', 'Character homes and mature neighborhoods', 'Close-in commute advantages']
-  }
+  winterGarden: { key: 'winterGarden', title: 'Winter Garden', region: 'Orlando West', medianPrice: 560000, schoolRating: 'A', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['Top schools and family-focused neighborhoods', 'Historic downtown plus modern conveniences', 'Quick access to Orlando job centers'] },
+  horizonWest: { key: 'horizonWest', title: 'Horizon West', region: 'Orlando West', medianPrice: 560000, schoolRating: 'A', constructionType: 'new', sizeCapacity: 3000, highlights: ['Hamlin Town Center and newer retail', 'Master-planned communities with trails', 'Strong new-build inventory'] },
+  windermere: { key: 'windermere', title: 'Windermere', region: 'Orlando West', medianPrice: 836000, schoolRating: 'A', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['Luxury lakefront homes and gated options', 'Top school zoning including Windermere High', 'Upscale lifestyle with privacy'] },
+  drPhillips: { key: 'drPhillips', title: 'Dr. Phillips', region: 'Orlando West', medianPrice: 836000, schoolRating: 'A-', constructionType: 'resale', sizeCapacity: 2500, highlights: ['Restaurant Row and upscale dining', 'Established high-demand neighborhoods', 'Close to Universal and major roads'] },
+  clermont: { key: 'clermont', title: 'Clermont + South Lake', region: 'Orlando West', medianPrice: 447000, schoolRating: 'A-', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['Rolling hills and lake lifestyle', 'Outdoor recreation and trails', 'Great blend of space and value'] },
+  grovelandMascotte: { key: 'grovelandMascotte', title: 'Groveland + Mascotte', region: 'Orlando West', medianPrice: 375000, schoolRating: 'B+', constructionType: 'new', sizeCapacity: 3000, highlights: ['Affordable new construction communities', 'Rural-to-suburban growth corridor', 'Large homesites for the price'] },
+  minneola: { key: 'minneola', title: 'Minneola', region: 'Orlando West', medianPrice: 520000, schoolRating: 'A-', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['Hills of Minneola growth area', 'Lakefront and elevated-view options', 'Fast-growing with new retail'] },
+  lakeNona: { key: 'lakeNona', title: 'Lake Nona', region: 'Orlando East', medianPrice: 760000, schoolRating: 'A', constructionType: 'new', sizeCapacity: 3000, highlights: ['Medical City and innovation hub', 'Modern master-planned communities', 'Strong schools and amenity districts'] },
+  winterParkMaitland: { key: 'winterParkMaitland', title: 'Winter Park + Maitland', region: 'Orlando East', medianPrice: 550000, schoolRating: 'A', constructionType: 'resale', sizeCapacity: 2500, highlights: ['Historic charm and tree-lined streets', 'Park Avenue walkability and dining', 'Consistently strong school demand'] },
+  apopka: { key: 'apopka', title: 'Apopka', region: 'Orlando East', medianPrice: 400000, schoolRating: 'B+', constructionType: 'mixed', sizeCapacity: 2500, highlights: ['Affordable access to Orlando', 'Near Wekiva Springs and nature', 'Growing mix of old and new neighborhoods'] },
+  sanford: { key: 'sanford', title: 'Sanford', region: 'Orlando East', medianPrice: 375000, schoolRating: 'B+', constructionType: 'resale', sizeCapacity: 2500, highlights: ['Historic downtown and waterfront', 'SunRail connectivity to Orlando', 'Character homes plus value pockets'] },
+  kissimmeeStCloud: { key: 'kissimmeeStCloud', title: 'Kissimmee + St. Cloud', region: 'Orlando South', medianPrice: 325000, schoolRating: 'B+', constructionType: 'mixed', sizeCapacity: 2500, highlights: ['Affordable Disney-area access', 'Diverse communities and price points', 'Short-term-rental-friendly zones nearby'] },
+  davenport: { key: 'davenport', title: 'Davenport', region: 'Orlando South', medianPrice: 360000, schoolRating: 'B+', constructionType: 'new', sizeCapacity: 3000, highlights: ['Vacation-home and investor demand', 'Strong short-term rental relevance', 'Fast access to Disney corridors'] },
+  celebration: { key: 'celebration', title: 'Celebration', region: 'Orlando South', medianPrice: 650000, schoolRating: 'A-', constructionType: 'resale', sizeCapacity: 2500, highlights: ['Disney-built walkable town center', 'Distinctive architecture and HOA upkeep', 'Premium feel with community events'] },
+  wesleyChapelNewTampa: { key: 'wesleyChapelNewTampa', title: 'Wesley Chapel + New Tampa', region: 'Tampa North', medianPrice: 424000, schoolRating: 'A', constructionType: 'new', sizeCapacity: 3000, highlights: ['Top schools and family communities', 'Major new construction inventory', 'Easy I-75 access to Tampa'] },
+  landOLakes: { key: 'landOLakes', title: 'Land O Lakes', region: 'Tampa North', medianPrice: 434000, schoolRating: 'A-', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['Family-oriented planned neighborhoods', 'Connerton and Starkey-adjacent growth', 'Good value for size near Tampa'] },
+  brandon: { key: 'brandon', title: 'Brandon', region: 'Tampa East', medianPrice: 365000, schoolRating: 'B+', constructionType: 'resale', sizeCapacity: 2500, highlights: ['Established neighborhoods near Tampa', 'Strong commuter convenience', 'Affordable compared to core Tampa'] },
+  riverview: { key: 'riverview', title: 'Riverview', region: 'Tampa East', medianPrice: 410000, schoolRating: 'B+', constructionType: 'new', sizeCapacity: 3000, highlights: ['Massive new-construction pipeline', 'Popular with young families', 'Convenient for Tampa and Brandon commutes'] },
+  plantCity: { key: 'plantCity', title: 'Plant City', region: 'Tampa East', medianPrice: 340000, schoolRating: 'B', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['Rural character with larger lots', 'Affordable homes and acreage options', 'Between Tampa and Lakeland'] },
+  southTampa: { key: 'southTampa', title: 'South Tampa', region: 'Tampa West', medianPrice: 650000, schoolRating: 'A-', constructionType: 'resale', sizeCapacity: 2000, highlights: ['Urban walkable lifestyle and dining', 'Hyde Park and waterfront appeal', 'Premium pricing with top demand'] },
+  stPetersburg: { key: 'stPetersburg', title: 'St. Petersburg', region: 'Pinellas', medianPrice: 400000, schoolRating: 'B+', constructionType: 'resale', sizeCapacity: 2000, highlights: ['Arts-and-culture downtown energy', 'Waterfront parks and marinas', 'Beach access with urban amenities'] },
+  clearwater: { key: 'clearwater', title: 'Clearwater', region: 'Pinellas', medianPrice: 340000, schoolRating: 'B+', constructionType: 'mixed', sizeCapacity: 2000, highlights: ['Close to award-winning beaches', 'Tourism-driven economy and convenience', 'Affordable Pinellas entry point'] },
+  lakeland: { key: 'lakeland', title: 'Lakeland', region: 'Polk County', medianPrice: 295000, schoolRating: 'B+', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['One of the best values on I-4', 'Revitalizing downtown and job growth', 'Balanced distance to Tampa and Orlando'] },
+  winterHaven: { key: 'winterHaven', title: 'Winter Haven', region: 'Polk County', medianPrice: 295000, schoolRating: 'B+', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['Chain of Lakes lifestyle', 'Affordable pricing with recreation', 'Retirement- and family-friendly options'] },
+  lakeAlfred: { key: 'lakeAlfred', title: 'Lake Alfred', region: 'Polk County', medianPrice: 330000, schoolRating: 'B', constructionType: 'mixed', sizeCapacity: 2500, highlights: ['Small-town feel and lower prices', 'Convenient to Lakeland and Winter Haven', 'Emerging value neighborhoods'] },
+  hainesCity: { key: 'hainesCity', title: 'Haines City', region: 'Polk County', medianPrice: 325000, schoolRating: 'B', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['Affordable with Disney-side access', 'Growing rental and vacation demand', 'New communities at lower price points'] },
+  lakeWales: { key: 'lakeWales', title: 'Lake Wales', region: 'Polk County', medianPrice: 258000, schoolRating: 'B', constructionType: 'resale', sizeCapacity: 2500, highlights: ['Most affordable market in the quiz', 'Historic downtown and Bok Tower area', 'Great for strict budget shoppers'] },
+  auburndale: { key: 'auburndale', title: 'Auburndale', region: 'Polk County', medianPrice: 326000, schoolRating: 'B+', constructionType: 'mixed', sizeCapacity: 3000, highlights: ['Family-focused communities', 'Easy access to Lakeland employers', 'Solid value with newer pockets'] },
+  lakewoodRanch: { key: 'lakewoodRanch', title: 'Lakewood Ranch', region: 'Sarasota/Manatee', medianPrice: 595000, schoolRating: 'A+', constructionType: 'new', sizeCapacity: 3000, highlights: ['Top master-planned community in the U.S.', 'A+ schools and full amenities', 'Upscale lifestyle near beaches'] },
+  sarasota: { key: 'sarasota', title: 'Sarasota', region: 'Sarasota/Manatee', medianPrice: 475000, schoolRating: 'A-', constructionType: 'mixed', sizeCapacity: 2500, highlights: ['Strong arts and cultural scene', 'Beach-city lifestyle with walkability', 'Popular retirement and relocation market'] },
+  bradenton: { key: 'bradenton', title: 'Bradenton', region: 'Sarasota/Manatee', medianPrice: 435000, schoolRating: 'B+', constructionType: 'mixed', sizeCapacity: 2500, highlights: ['Beach access at lower cost than Sarasota', 'Anna Maria Island proximity', 'Good range of neighborhoods'] },
+  parrish: { key: 'parrish', title: 'Parrish', region: 'Sarasota/Manatee', medianPrice: 443000, schoolRating: 'B+', constructionType: 'new', sizeCapacity: 3000, highlights: ['Booming new-construction market', 'Family-oriented master plans', 'Strong inventory for larger homes'] },
+  mountDora: { key: 'mountDora', title: 'Mount Dora', region: 'Lake County', medianPrice: 435000, schoolRating: 'A-', constructionType: 'resale', sizeCapacity: 2500, highlights: ['Charming and walkable historic downtown', 'Lakefront views and festivals', 'Top choice for arts-focused retirees'] }
 };
 
 export const questions: QuizQuestion[] = [
   {
     id: 1,
-    prompt: 'What lifestyle vibe feels most like home?',
+    prompt: 'What lifestyle is the best fit?',
     options: [
-      { text: 'Urban, walkable, and always something happening', scores: { wesleyChapel: 1, southTampa: 3, stPete: 3, polkCounty: 0, lakewoodRanch: 1, sarasota: 2, winterGarden: 1, lakeNona: 2, clermont: 0, kissimmee: 1, winterPark: 3 } },
-      { text: 'Master-planned suburban living with amenities', scores: { wesleyChapel: 3, southTampa: 2, stPete: 1, polkCounty: 1, lakewoodRanch: 3, sarasota: 1, winterGarden: 3, lakeNona: 3, clermont: 2, kissimmee: 2, winterPark: 1 } },
-      { text: 'More space, quieter roads, and a slower pace', scores: { wesleyChapel: 2, southTampa: 0, stPete: 0, polkCounty: 3, lakewoodRanch: 1, sarasota: 1, winterGarden: 1, lakeNona: 0, clermont: 3, kissimmee: 2, winterPark: 1 } },
-      { text: 'Coastal relaxed with beach-town energy', scores: { wesleyChapel: 0, southTampa: 1, stPete: 3, polkCounty: 0, lakewoodRanch: 3, sarasota: 3, winterGarden: 0, lakeNona: 0, clermont: 0, kissimmee: 0, winterPark: 1 } },
-      { text: 'Small-city feel with local pride and affordability', scores: { wesleyChapel: 1, southTampa: 1, stPete: 0, polkCounty: 3, lakewoodRanch: 0, sarasota: 1, winterGarden: 1, lakeNona: 0, clermont: 2, kissimmee: 2, winterPark: 0 } }
+      { text: 'Beach + coastal energy', tagBoosts: { beach: 3, downtownWalkable: 1 }, insight: 'You value coastal lifestyle and waterfront access.' },
+      { text: 'Master-planned suburbs with amenities', tagBoosts: { newConstruction: 3, topSchools: 2 }, insight: 'You prefer amenity-rich suburban communities.' },
+      { text: 'Historic downtown charm and walkability', tagBoosts: { downtownWalkable: 3, luxury: 1 }, insight: 'Walkable districts and character neighborhoods matter to you.' },
+      { text: 'Space, lakes, trails, and outdoors', tagBoosts: { outdoorNature: 3, affordability: 1 }, insight: 'You prioritize nature access and elbow room.' }
     ]
   },
   {
     id: 2,
-    prompt: 'Which work/commute setup best matches your life right now?',
+    prompt: 'How important are top-rated schools?',
     options: [
-      { text: 'I need strong access to Tampa-area jobs', scores: { wesleyChapel: 3, southTampa: 3, stPete: 2, polkCounty: 1, lakewoodRanch: 1, sarasota: 1, winterGarden: 0, lakeNona: 0, clermont: 0, kissimmee: 0, winterPark: 0 } },
-      { text: 'I need strong access to Orlando-area jobs', scores: { wesleyChapel: 0, southTampa: 0, stPete: 0, polkCounty: 1, lakewoodRanch: 0, sarasota: 0, winterGarden: 3, lakeNona: 3, clermont: 2, kissimmee: 3, winterPark: 3 } },
-      { text: 'Remote or hybrid — I care more about quality of life', scores: { wesleyChapel: 2, southTampa: 1, stPete: 2, polkCounty: 3, lakewoodRanch: 2, sarasota: 2, winterGarden: 2, lakeNona: 1, clermont: 3, kissimmee: 2, winterPark: 1 } },
-      { text: 'Medical/tech ecosystem is a major priority', scores: { wesleyChapel: 1, southTampa: 2, stPete: 1, polkCounty: 0, lakewoodRanch: 1, sarasota: 1, winterGarden: 1, lakeNona: 3, clermont: 0, kissimmee: 1, winterPark: 2 } }
+      { text: 'Critical priority', tagBoosts: { topSchools: 3 }, insight: 'Top-tier school zones are a major priority.' },
+      { text: 'Important but not everything', tagBoosts: { topSchools: 2 } },
+      { text: 'Nice to have', tagBoosts: { topSchools: 1 } },
+      { text: 'Not a deciding factor', tagBoosts: {} }
     ]
   },
   {
     id: 3,
-    prompt: 'Pick your ideal weekend plan:',
+    prompt: 'How much does Disney/theme park access matter?',
     options: [
-      { text: 'Beach day, sunset, and waterfront dining', scores: { wesleyChapel: 0, southTampa: 2, stPete: 3, polkCounty: 0, lakewoodRanch: 3, sarasota: 3, winterGarden: 0, lakeNona: 0, clermont: 0, kissimmee: 0, winterPark: 1 } },
-      { text: 'Theme parks and entertainment hubs', scores: { wesleyChapel: 0, southTampa: 0, stPete: 0, polkCounty: 1, lakewoodRanch: 0, sarasota: 0, winterGarden: 3, lakeNona: 2, clermont: 2, kissimmee: 3, winterPark: 1 } },
-      { text: 'Lakes, trails, and outdoor adventure', scores: { wesleyChapel: 2, southTampa: 1, stPete: 1, polkCounty: 3, lakewoodRanch: 1, sarasota: 1, winterGarden: 2, lakeNona: 1, clermont: 3, kissimmee: 2, winterPark: 1 } },
-      { text: 'Arts, dining, breweries, and culture', scores: { wesleyChapel: 1, southTampa: 3, stPete: 3, polkCounty: 1, lakewoodRanch: 1, sarasota: 3, winterGarden: 1, lakeNona: 2, clermont: 0, kissimmee: 1, winterPark: 3 } },
-      { text: 'Community events and neighborhood gatherings', scores: { wesleyChapel: 3, southTampa: 2, stPete: 1, polkCounty: 2, lakewoodRanch: 3, sarasota: 1, winterGarden: 3, lakeNona: 2, clermont: 2, kissimmee: 2, winterPark: 1 } }
+      { text: 'Very important', tagBoosts: { themeParks: 3 }, insight: 'Theme park proximity is a strong driver in your search.' },
+      { text: 'Somewhat important', tagBoosts: { themeParks: 2 } },
+      { text: 'Only for occasional visits', tagBoosts: { themeParks: 1 } },
+      { text: 'Not important', tagBoosts: {} }
     ]
   },
   {
     id: 4,
-    prompt: 'What home style are you most drawn to?',
+    prompt: 'Will you need short-term-rental flexibility?',
     options: [
-      { text: 'New construction in master-planned communities', scores: { wesleyChapel: 3, southTampa: 2, stPete: 1, polkCounty: 2, lakewoodRanch: 3, sarasota: 1, winterGarden: 3, lakeNona: 3, clermont: 2, kissimmee: 3, winterPark: 0 } },
-      { text: 'Modern upscale homes with design-forward finishes', scores: { wesleyChapel: 2, southTampa: 3, stPete: 2, polkCounty: 0, lakewoodRanch: 3, sarasota: 2, winterGarden: 1, lakeNona: 3, clermont: 0, kissimmee: 1, winterPark: 2 } },
-      { text: 'Larger lots and better value for square footage', scores: { wesleyChapel: 2, southTampa: 1, stPete: 0, polkCounty: 3, lakewoodRanch: 1, sarasota: 1, winterGarden: 1, lakeNona: 0, clermont: 3, kissimmee: 3, winterPark: 0 } },
-      { text: 'Coastal homes or condos near the water', scores: { wesleyChapel: 0, southTampa: 2, stPete: 3, polkCounty: 0, lakewoodRanch: 3, sarasota: 3, winterGarden: 0, lakeNona: 0, clermont: 0, kissimmee: 0, winterPark: 1 } },
-      { text: 'Historic character and established neighborhoods', scores: { wesleyChapel: 0, southTampa: 2, stPete: 2, polkCounty: 1, lakewoodRanch: 0, sarasota: 2, winterGarden: 1, lakeNona: 0, clermont: 1, kissimmee: 1, winterPark: 3 } }
+      { text: 'Yes, STR potential is important', tagBoosts: { shortTermRental: 3 }, insight: 'You want markets that support short-term rental opportunities.' },
+      { text: 'Maybe in the future', tagBoosts: { shortTermRental: 2 } },
+      { text: 'Unlikely', tagBoosts: { shortTermRental: 1 } },
+      { text: 'No, owner-occupied only', tagBoosts: {} }
     ]
   },
   {
     id: 5,
-    prompt: 'What budget range are you targeting?',
+    prompt: 'Which commute target matters more?',
     options: [
-      { text: 'Under $300k', scores: { wesleyChapel: 1, southTampa: 0, stPete: 0, polkCounty: 3, lakewoodRanch: 0, sarasota: 0, winterGarden: 0, lakeNona: 0, clermont: 2, kissimmee: 3, winterPark: 0 } },
-      { text: '$300k - $450k', scores: { wesleyChapel: 3, southTampa: 2, stPete: 1, polkCounty: 3, lakewoodRanch: 1, sarasota: 1, winterGarden: 3, lakeNona: 2, clermont: 3, kissimmee: 3, winterPark: 1 } },
-      { text: '$450k - $600k', scores: { wesleyChapel: 2, southTampa: 3, stPete: 2, polkCounty: 1, lakewoodRanch: 3, sarasota: 2, winterGarden: 2, lakeNona: 3, clermont: 2, kissimmee: 1, winterPark: 2 } },
-      { text: '$600k+', scores: { wesleyChapel: 1, southTampa: 3, stPete: 3, polkCounty: 0, lakewoodRanch: 3, sarasota: 3, winterGarden: 1, lakeNona: 3, clermont: 1, kissimmee: 0, winterPark: 3 } }
+      { text: 'Tampa area access', tagBoosts: { commuteTampa: 3 }, insight: 'You want shorter commutes to Tampa hubs.' },
+      { text: 'Orlando area access', tagBoosts: { commuteOrlando: 3 }, insight: 'You want to stay convenient to Orlando.' },
+      { text: 'Balanced between both metros', tagBoosts: { commuteTampa: 2, commuteOrlando: 2 } },
+      { text: 'Commute is not a major factor', tagBoosts: {} }
     ]
   },
   {
     id: 6,
-    prompt: 'How important are top-rated schools?',
+    prompt: 'What price point best matches your maximum budget?',
     options: [
-      { text: 'Critical — this is a top decision factor', scores: { wesleyChapel: 3, southTampa: 2, stPete: 1, polkCounty: 1, lakewoodRanch: 3, sarasota: 2, winterGarden: 3, lakeNona: 2, clermont: 2, kissimmee: 1, winterPark: 2 } },
-      { text: 'Good schools are enough, balance matters most', scores: { wesleyChapel: 2, southTampa: 2, stPete: 2, polkCounty: 2, lakewoodRanch: 2, sarasota: 2, winterGarden: 2, lakeNona: 2, clermont: 2, kissimmee: 2, winterPark: 2 } },
-      { text: 'Not a major factor (no kids or different priority)', scores: { wesleyChapel: 1, southTampa: 3, stPete: 3, polkCounty: 2, lakewoodRanch: 2, sarasota: 3, winterGarden: 1, lakeNona: 2, clermont: 2, kissimmee: 2, winterPark: 3 } },
-      { text: 'I want school quality plus after-school amenities', scores: { wesleyChapel: 3, southTampa: 2, stPete: 1, polkCounty: 1, lakewoodRanch: 3, sarasota: 1, winterGarden: 3, lakeNona: 3, clermont: 2, kissimmee: 2, winterPark: 1 } }
+      { text: 'Under $300K', budgetValue: 'under300', insight: 'You are focused on the most affordable relocation options.' },
+      { text: '$300K - $400K', budgetValue: '300to400' },
+      { text: '$400K - $500K', budgetValue: '400to500' },
+      { text: '$500K - $650K', budgetValue: '500to650' },
+      { text: '$650K - $800K', budgetValue: '650to800' },
+      { text: '$800K+', budgetValue: '800plus' }
     ]
   },
   {
     id: 7,
-    prompt: 'How important is being close to Gulf beaches?',
+    prompt: 'What minimum home size do you want?',
     options: [
-      { text: 'Must be close — beach life is non-negotiable', scores: { wesleyChapel: 0, southTampa: 2, stPete: 3, polkCounty: 0, lakewoodRanch: 3, sarasota: 3, winterGarden: 0, lakeNona: 0, clermont: 0, kissimmee: 0, winterPark: 1 } },
-      { text: 'Nice to have on weekends', scores: { wesleyChapel: 2, southTampa: 3, stPete: 2, polkCounty: 1, lakewoodRanch: 2, sarasota: 2, winterGarden: 1, lakeNona: 0, clermont: 1, kissimmee: 0, winterPark: 1 } },
-      { text: 'Not important to me', scores: { wesleyChapel: 3, southTampa: 1, stPete: 0, polkCounty: 3, lakewoodRanch: 1, sarasota: 0, winterGarden: 3, lakeNona: 3, clermont: 3, kissimmee: 3, winterPark: 2 } },
-      { text: 'I prefer lakes and parks over beaches', scores: { wesleyChapel: 2, southTampa: 1, stPete: 0, polkCounty: 3, lakewoodRanch: 1, sarasota: 0, winterGarden: 2, lakeNona: 2, clermont: 3, kissimmee: 2, winterPark: 2 } }
+      { text: 'At least 1,500 sf', sizeValue: 1500 },
+      { text: 'At least 2,000 sf', sizeValue: 2000 },
+      { text: 'At least 2,500 sf', sizeValue: 2500, insight: 'You need areas where larger homes are common.' },
+      { text: 'At least 3,000 sf', sizeValue: 3000, insight: 'You are targeting large-home inventory.' }
     ]
   },
   {
     id: 8,
-    prompt: 'How much does theme park proximity matter?',
+    prompt: 'Do you prefer new construction or resale homes?',
     options: [
-      { text: 'Very important for my lifestyle', scores: { wesleyChapel: 0, southTampa: 0, stPete: 0, polkCounty: 2, lakewoodRanch: 0, sarasota: 0, winterGarden: 3, lakeNona: 2, clermont: 2, kissimmee: 3, winterPark: 1 } },
-      { text: 'Nice to have for visitors', scores: { wesleyChapel: 1, southTampa: 1, stPete: 1, polkCounty: 3, lakewoodRanch: 0, sarasota: 0, winterGarden: 3, lakeNona: 2, clermont: 2, kissimmee: 3, winterPark: 2 } },
-      { text: 'Not a priority at all', scores: { wesleyChapel: 3, southTampa: 3, stPete: 3, polkCounty: 1, lakewoodRanch: 3, sarasota: 3, winterGarden: 1, lakeNona: 1, clermont: 2, kissimmee: 0, winterPark: 2 } },
-      { text: 'I care more about central access to both metros', scores: { wesleyChapel: 1, southTampa: 1, stPete: 0, polkCounty: 3, lakewoodRanch: 0, sarasota: 0, winterGarden: 2, lakeNona: 1, clermont: 2, kissimmee: 2, winterPark: 1 } }
-    ]
-  },
-  {
-    id: 9,
-    prompt: 'What pace of life do you prefer?',
-    options: [
-      { text: 'Fast-paced urban energy', scores: { wesleyChapel: 1, southTampa: 3, stPete: 3, polkCounty: 0, lakewoodRanch: 1, sarasota: 2, winterGarden: 1, lakeNona: 2, clermont: 0, kissimmee: 1, winterPark: 3 } },
-      { text: 'Active suburban with plenty to do', scores: { wesleyChapel: 3, southTampa: 2, stPete: 1, polkCounty: 1, lakewoodRanch: 3, sarasota: 1, winterGarden: 3, lakeNona: 3, clermont: 2, kissimmee: 2, winterPark: 1 } },
-      { text: 'Laid-back small-town rhythm', scores: { wesleyChapel: 2, southTampa: 0, stPete: 0, polkCounty: 3, lakewoodRanch: 1, sarasota: 1, winterGarden: 1, lakeNona: 0, clermont: 3, kissimmee: 2, winterPark: 1 } },
-      { text: 'Relaxed coastal lifestyle', scores: { wesleyChapel: 0, southTampa: 1, stPete: 3, polkCounty: 0, lakewoodRanch: 3, sarasota: 3, winterGarden: 0, lakeNona: 0, clermont: 0, kissimmee: 0, winterPark: 1 } }
-    ]
-  },
-  {
-    id: 10,
-    prompt: 'What neighborhood feature matters most?',
-    options: [
-      { text: 'Walkability, restaurants, and nightlife', scores: { wesleyChapel: 1, southTampa: 3, stPete: 3, polkCounty: 0, lakewoodRanch: 1, sarasota: 2, winterGarden: 2, lakeNona: 2, clermont: 0, kissimmee: 1, winterPark: 3 } },
-      { text: 'Community amenities (pools, parks, events)', scores: { wesleyChapel: 3, southTampa: 2, stPete: 1, polkCounty: 1, lakewoodRanch: 3, sarasota: 1, winterGarden: 3, lakeNona: 3, clermont: 2, kissimmee: 2, winterPark: 1 } },
-      { text: 'Space, privacy, and room to grow', scores: { wesleyChapel: 2, southTampa: 1, stPete: 0, polkCounty: 3, lakewoodRanch: 1, sarasota: 1, winterGarden: 1, lakeNona: 0, clermont: 3, kissimmee: 2, winterPark: 1 } },
-      { text: 'Direct beach and waterfront access', scores: { wesleyChapel: 0, southTampa: 2, stPete: 3, polkCounty: 0, lakewoodRanch: 3, sarasota: 3, winterGarden: 0, lakeNona: 0, clermont: 0, kissimmee: 0, winterPark: 1 } },
-      { text: 'Affordability and monthly budget comfort', scores: { wesleyChapel: 2, southTampa: 1, stPete: 0, polkCounty: 3, lakewoodRanch: 0, sarasota: 1, winterGarden: 1, lakeNona: 0, clermont: 3, kissimmee: 3, winterPark: 0 } }
-    ]
-  },
-  {
-    id: 11,
-    prompt: 'How much commute time are you comfortable with?',
-    options: [
-      { text: 'Under 20 minutes preferred', scores: { wesleyChapel: 2, southTampa: 3, stPete: 3, polkCounty: 0, lakewoodRanch: 1, sarasota: 2, winterGarden: 2, lakeNona: 3, clermont: 1, kissimmee: 2, winterPark: 3 } },
-      { text: '20-40 minutes is reasonable', scores: { wesleyChapel: 3, southTampa: 2, stPete: 2, polkCounty: 2, lakewoodRanch: 3, sarasota: 2, winterGarden: 3, lakeNona: 2, clermont: 2, kissimmee: 2, winterPark: 2 } },
-      { text: '40+ minutes is fine for more house/space', scores: { wesleyChapel: 1, southTampa: 0, stPete: 0, polkCounty: 3, lakewoodRanch: 1, sarasota: 1, winterGarden: 1, lakeNona: 0, clermont: 3, kissimmee: 3, winterPark: 0 } },
-      { text: 'I mostly work from home, commute is occasional', scores: { wesleyChapel: 2, southTampa: 1, stPete: 2, polkCounty: 3, lakewoodRanch: 2, sarasota: 2, winterGarden: 2, lakeNona: 1, clermont: 3, kissimmee: 2, winterPark: 1 } }
-    ]
-  },
-  {
-    id: 12,
-    prompt: 'What would you most want to show visitors?',
-    options: [
-      { text: 'City skyline, nightlife, and downtown spots', scores: { wesleyChapel: 1, southTampa: 3, stPete: 3, polkCounty: 0, lakewoodRanch: 1, sarasota: 2, winterGarden: 1, lakeNona: 2, clermont: 0, kissimmee: 1, winterPark: 3 } },
-      { text: 'Beach sunsets and waterfront views', scores: { wesleyChapel: 0, southTampa: 2, stPete: 3, polkCounty: 0, lakewoodRanch: 3, sarasota: 3, winterGarden: 0, lakeNona: 0, clermont: 0, kissimmee: 0, winterPark: 1 } },
-      { text: 'Theme parks and entertainment', scores: { wesleyChapel: 0, southTampa: 0, stPete: 0, polkCounty: 2, lakewoodRanch: 0, sarasota: 0, winterGarden: 3, lakeNona: 2, clermont: 2, kissimmee: 3, winterPark: 1 } },
-      { text: 'My community amenities and neighborhood vibe', scores: { wesleyChapel: 3, southTampa: 2, stPete: 1, polkCounty: 2, lakewoodRanch: 3, sarasota: 1, winterGarden: 3, lakeNona: 3, clermont: 2, kissimmee: 2, winterPark: 1 } },
-      { text: 'Lakes, trails, and natural scenery', scores: { wesleyChapel: 2, southTampa: 1, stPete: 1, polkCounty: 3, lakewoodRanch: 1, sarasota: 1, winterGarden: 2, lakeNona: 1, clermont: 3, kissimmee: 2, winterPark: 1 } }
+      { text: 'New construction only', constructionValue: 'new', tagBoosts: { newConstruction: 3 } },
+      { text: 'Resale/established only', constructionValue: 'resale', tagBoosts: { downtownWalkable: 1 } },
+      { text: 'Either is fine', constructionValue: 'either' }
     ]
   }
 ];
+
+export const tagWeights: Record<ScoreTag, Partial<Record<AreaKey, number>>> = {
+  beach: { stPetersburg: 3, clearwater: 3, sarasota: 3, bradenton: 3, lakewoodRanch: 2 },
+  themeParks: { kissimmeeStCloud: 3, davenport: 3, celebration: 3, horizonWest: 2, lakeNona: 2 },
+  topSchools: { lakewoodRanch: 3, lakeNona: 3, wesleyChapelNewTampa: 3, winterParkMaitland: 3, windermere: 3, winterGarden: 2 },
+  affordability: { lakeWales: 3, winterHaven: 3, lakeland: 3, hainesCity: 3, grovelandMascotte: 2, kissimmeeStCloud: 2 },
+  newConstruction: { wesleyChapelNewTampa: 3, riverview: 3, parrish: 3, horizonWest: 3, grovelandMascotte: 3, lakewoodRanch: 2, lakeNona: 2, davenport: 3 },
+  luxury: { windermere: 3, southTampa: 3, lakeNona: 3, winterParkMaitland: 2, lakewoodRanch: 2 },
+  shortTermRental: { davenport: 3, kissimmeeStCloud: 3, hainesCity: 3, celebration: 2 },
+  downtownWalkable: { winterParkMaitland: 3, stPetersburg: 3, mountDora: 3, southTampa: 3, sarasota: 2, lakeland: 2 },
+  outdoorNature: { clermont: 3, mountDora: 3, winterHaven: 3, sanford: 2, landOLakes: 2 },
+  commuteTampa: { wesleyChapelNewTampa: 3, brandon: 3, riverview: 3, lakeland: 2, landOLakes: 2 },
+  commuteOrlando: { winterGarden: 3, lakeNona: 3, winterParkMaitland: 3, sanford: 2, apopka: 2 }
+};
+
+const budgetPools: Record<BudgetBracket, AreaKey[]> = {
+  under300: ['lakeWales', 'winterHaven', 'lakeland', 'hainesCity', 'lakeAlfred', 'auburndale'],
+  '300to400': ['kissimmeeStCloud', 'davenport', 'grovelandMascotte', 'sanford', 'apopka', 'brandon', 'clearwater', 'plantCity'],
+  '400to500': ['wesleyChapelNewTampa', 'riverview', 'mountDora', 'clermont', 'landOLakes', 'bradenton', 'stPetersburg', 'parrish'],
+  '500to650': ['winterGarden', 'horizonWest', 'winterParkMaitland', 'minneola', 'lakewoodRanch', 'southTampa'],
+  '650to800': ['lakeNona', 'celebration', 'sarasota'],
+  '800plus': ['windermere', 'drPhillips', 'lakeNona', 'lakewoodRanch']
+};
+
+export function getBudgetAllowedAreas(budget: BudgetBracket): Set<AreaKey> {
+  const ordered: BudgetBracket[] = ['under300', '300to400', '400to500', '500to650', '650to800', '800plus'];
+  const maxIndex = ordered.indexOf(budget);
+  const allowed = new Set<AreaKey>();
+
+  ordered.slice(0, maxIndex + 1).forEach((bracket) => {
+    budgetPools[bracket].forEach((key) => allowed.add(key));
+  });
+
+  return allowed;
+}
+
+export function filterBySize(area: AreaProfile, minSize: SizeNeed) {
+  return area.sizeCapacity >= minSize;
+}
+
+export function filterByConstruction(area: AreaProfile, preference: 'new' | 'resale' | 'either') {
+  if (preference === 'either') {
+    return true;
+  }
+
+  if (preference === 'new') {
+    return area.constructionType === 'new' || area.constructionType === 'mixed';
+  }
+
+  return area.constructionType === 'resale' || area.constructionType === 'mixed';
+}
