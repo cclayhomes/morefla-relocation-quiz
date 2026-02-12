@@ -36,26 +36,13 @@ export const AREA_KEYS = [
 
 export type AreaKey = (typeof AREA_KEYS)[number];
 
-export type ScoreTag =
-  | 'beach'
-  | 'themeParks'
-  | 'topSchools'
-  | 'affordability'
-  | 'newConstruction'
-  | 'luxury'
-  | 'shortTermRental'
-  | 'downtownWalkable'
-  | 'outdoorNature'
-  | 'commuteTampa'
-  | 'commuteOrlando';
-
 export type BudgetBracket = 'under300' | '300to400' | '400to500' | '500to650' | '650to800' | '800plus';
 export type SizeNeed = 1500 | 2000 | 2500 | 3000;
 export type ConstructionPreference = 'new' | 'resale' | 'either';
 
 export interface QuizOption {
   text: string;
-  tagBoosts?: Partial<Record<ScoreTag, number>>;
+  value: string;
   budgetValue?: BudgetBracket;
   sizeValue?: SizeNeed;
   constructionValue?: ConstructionPreference;
@@ -73,10 +60,27 @@ export interface AreaProfile {
   title: string;
   region: string;
   medianPrice: number;
-  schoolRating: 'A+' | 'A' | 'A-' | 'B+' | 'B';
+  schoolRating: 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-';
   highlights: string[];
   constructionType: 'new' | 'resale' | 'mixed';
   sizeCapacity: SizeNeed;
+  hasPrivateSchools: boolean;
+  strongSports: boolean;
+  commuteOrlando: 'close' | 'medium' | 'far';
+  commuteTampa: 'close' | 'medium' | 'far';
+  commuteI4: 'close' | 'medium' | 'far';
+  nearAttractions: boolean;
+  waterAccess: 'excellent' | 'good' | 'limited';
+  golfCommunities: boolean;
+  downtownWalkable: boolean;
+  farmersMarkets: boolean;
+  natureTrails: boolean;
+  neighborhoodType: 'new' | 'established' | 'mixed';
+  hoaLevel: 'full' | 'light' | 'none' | 'mixed';
+  airportMCO: number;
+  airportTPA: number;
+  airportSRQ: number;
+  diningStyle: 'chains' | 'local' | 'mixed';
 }
 
 export interface LeadFormData {
