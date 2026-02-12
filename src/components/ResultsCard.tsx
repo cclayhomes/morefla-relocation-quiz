@@ -1,4 +1,4 @@
-import { AreaKey, AreaProfile, LeadFormData } from '../types';
+import { AreaProfile, LeadFormData } from '../types';
 
 interface RankedArea {
   area: AreaProfile;
@@ -7,7 +7,6 @@ interface RankedArea {
 
 interface ResultsCardProps {
   rankedMatches: RankedArea[];
-  scoreBreakdown: Record<AreaKey, number>;
   leadData: LeadFormData;
   insights: string[];
   onRestart: () => void;
@@ -17,7 +16,7 @@ function formatPrice(price: number) {
   return `$${(price / 1000).toFixed(0)}K`;
 }
 
-export function ResultsCard({ rankedMatches, scoreBreakdown, leadData, insights, onRestart }: ResultsCardProps) {
+export function ResultsCard({ rankedMatches, leadData, insights, onRestart }: ResultsCardProps) {
   const topThree = rankedMatches.slice(0, 3);
 
   return (
@@ -60,18 +59,6 @@ export function ResultsCard({ rankedMatches, scoreBreakdown, leadData, insights,
             <li key={insight}>{insight}</li>
           ))}
         </ul>
-      </div>
-
-      <div className="rounded-2xl bg-white p-6 shadow-card">
-        <h3 className="text-lg font-semibold text-slate-900">Filtered ranking across qualifying areas</h3>
-        <div className="mt-3 space-y-2">
-          {rankedMatches.map((match, index) => (
-            <div key={match.area.key} className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2 text-sm">
-              <span className="font-medium text-slate-700">#{index + 1} {match.area.title}</span>
-              <span className="font-semibold text-lagoon">{scoreBreakdown[match.area.key]} pts</span>
-            </div>
-          ))}
-        </div>
       </div>
 
       <div className="rounded-2xl border border-dashed border-lagoon/40 bg-white p-6 text-sm text-slate-700">
