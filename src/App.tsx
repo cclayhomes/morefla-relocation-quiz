@@ -1,14 +1,15 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import logoUrl from './assets/more-fla-logo.svg';
 import { LeadCaptureForm } from './components/LeadCaptureForm';
+import { LandingPage } from './components/LandingPage';
 import { ProgressBar } from './components/ProgressBar';
 import { ResultsCard } from './components/ResultsCard';
 import { areaProfiles, filterByConstruction, filterBySize, getBudgetAllowedAreas, questions } from './data/quizData';
 import { AREA_KEYS, AreaKey, BudgetBracket, ConstructionPreference, LeadFormData, QuizOption, SizeNeed } from './types';
 import { sendEvent } from './utils/analytics';
 
-type Stage = 'quiz' | 'lead' | 'result';
+type Stage = 'landing' | 'quiz' | 'lead' | 'result';
 
 type AnswerMap = {
   q1_schools_importance: string;
@@ -107,12 +108,18 @@ const readInitialUtms = (): UtmParams => {
   };
 };
 
+// Check if URL has ?start=quiz or #quiz to skip landing
+const shouldSkipLanding = (): boolean => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('start') === 'quiz' || window.location.hash === '#quiz';
+};
+
 function getActiveQuestions(skipSchoolPriority: boolean) {
   return questions.filter((q) => !(skipSchoolPriority && q.id === 2));
 }
 
 function App() {
-  const [stage, setStage] = useState<Stage>('quiz');
+  const [stage, setStage] = useState<Stage>(() => shouldSkipLanding() ? 'quiz' : 'landing');
   const [questionIndex, setQuestionIndex] = useState(0);
   const [scores, setScores] = useState<Record<AreaKey, number>>(baseScores);
   const [leadData, setLeadData] = useState<LeadFormData | null>(null);
@@ -121,7 +128,7 @@ function App() {
   const [constructionChoice, setConstructionChoice] = useState<ConstructionPreference>('either');
   const [insights, setInsights] = useState<string[]>([]);
   const [skipSchoolPriority, setSkipSchoolPriority] = useState(false);
-  const [workPreference, setWorkPreference] = useState<string>('remote');
+  const [workPreference, setWorkPreference] = useState('remote');
   const [answerValues, setAnswerValues] = useState<AnswerMap>(defaultAnswerValues);
   const [utmParams] = useState<UtmParams>(() => readInitialUtms());
 
@@ -130,7 +137,6 @@ function App() {
 
   const rankedMatches = useMemo(() => {
     const budgetAllowed = getBudgetAllowedAreas(budgetChoice);
-
     return AREA_KEYS.map((key) => ({ area: areaProfiles[key], score: scores[key] }))
       .filter((item) => budgetAllowed.has(item.area.key))
       .filter((item) => filterBySize(item.area, sizeChoice))
@@ -189,50 +195,43 @@ function App() {
         if (selected.value === 'mixed' && area.diningStyle === 'mixed') current[key] += 1;
       }
     });
-
     if (questionId === 2 && selected.value === 'academics') addPoints(['winterParkMaitland', 'lakeNona', 'lakewoodRanch', 'windermere'], 3, current);
     if (questionId === 2 && selected.value === 'sports') addPoints(['wesleyChapelNewTampa', 'lakewoodRanch', 'brandon'], 3, current);
     if (questionId === 2 && selected.value === 'private') addPoints(['winterParkMaitland', 'southTampa', 'lakeNona', 'drPhillips'], 3, current);
-
     if (questionId === 3 && selected.value === 'orlando') addPoints(['winterGarden', 'lakeNona', 'winterParkMaitland', 'apopka', 'sanford'], 3, current);
     if (questionId === 3 && selected.value === 'tampa') addPoints(['wesleyChapelNewTampa', 'brandon', 'riverview', 'southTampa', 'landOLakes'], 3, current);
     if (questionId === 3 && selected.value === 'i4') addPoints(['lakeland', 'winterHaven', 'hainesCity', 'plantCity', 'auburndale'], 3, current);
-
     if (questionId === 5 && selected.value === 'constantly') {
       addPoints(['kissimmeeStCloud', 'davenport', 'celebration', 'winterGarden'], 3, current);
       addPoints(['stPetersburg', 'clearwater', 'sarasota'], 2, current);
     }
-
     if (questionId === 6 && selected.value === 'water') addPoints(['winterHaven', 'clermont', 'sanford', 'mountDora', 'lakeland'], 3, current);
     if (questionId === 6 && selected.value === 'golf') addPoints(['lakewoodRanch', 'lakeNona', 'wesleyChapelNewTampa'], 3, current);
     if (questionId === 6 && selected.value === 'downtown') addPoints(['winterParkMaitland', 'stPetersburg', 'southTampa', 'mountDora', 'sarasota'], 3, current);
     if (questionId === 6 && selected.value === 'markets') addPoints(['plantCity', 'mountDora', 'winterGarden', 'lakeland'], 3, current);
     if (questionId === 6 && selected.value === 'trails') addPoints(['clermont', 'sanford', 'landOLakes'], 3, current);
     if (questionId === 6 && selected.value === 'quiet') addPoints(['lakeWales', 'lakeAlfred', 'grovelandMascotte', 'parrish'], 3, current);
-
     if (questionId === 7 && selected.value === 'new') addPoints(['wesleyChapelNewTampa', 'riverview', 'parrish', 'horizonWest', 'grovelandMascotte', 'davenport'], 3, current);
     if (questionId === 7 && selected.value === 'established') addPoints(['winterParkMaitland', 'southTampa', 'mountDora', 'sanford', 'celebration'], 3, current);
     if (questionId === 7 && selected.value === 'value') addPoints(['lakeland', 'winterHaven', 'hainesCity', 'lakeWales', 'auburndale', 'kissimmeeStCloud', 'grovelandMascotte'], 3, current);
-
     if (questionId === 8 && selected.value === 'full') addPoints(['lakewoodRanch', 'wesleyChapelNewTampa', 'lakeNona', 'horizonWest'], 3, current);
     if (questionId === 8 && selected.value === 'none') addPoints(['plantCity', 'lakeWales', 'lakeAlfred', 'sanford', 'apopka'], 3, current);
   };
 
+  const handleStartQuiz = () => {
+    sendEvent('landing_start_quiz', {});
+    setStage('quiz');
+  };
+
   const handleSelectAnswer = (optionIndex: number) => {
     const selectedOption = currentQuestion.options[optionIndex];
-
     if (questionIndex === 0) {
       sendEvent('quiz_start', { questionId: currentQuestion.id });
     }
-
     sendEvent('quiz_answer', { questionId: currentQuestion.id, value: selectedOption.value });
 
     const answerKey = questionToAnswerKey[currentQuestion.id];
-    const nextAnswerValues = {
-      ...answerValues,
-      [answerKey]: selectedOption.value
-    };
-
+    const nextAnswerValues = { ...answerValues, [answerKey]: selectedOption.value };
     setAnswerValues(nextAnswerValues);
 
     setScores((current) => {
@@ -243,7 +242,6 @@ function App() {
 
     if (currentQuestion.id === 1) setSkipSchoolPriority(selectedOption.value === 'noKids');
     if (currentQuestion.id === 3) setWorkPreference(selectedOption.value);
-
     if (selectedOption.budgetValue) setBudgetChoice(selectedOption.budgetValue);
     if (selectedOption.sizeValue) setSizeChoice(selectedOption.sizeValue);
     if (selectedOption.constructionValue) setConstructionChoice(selectedOption.constructionValue);
@@ -314,9 +312,7 @@ function App() {
     fetch(webhookUrl, {
       method: 'POST',
       mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     }).catch(() => {
       // fire-and-forget by design
@@ -324,7 +320,7 @@ function App() {
   };
 
   const restartQuiz = () => {
-    setStage('quiz');
+    setStage('landing');
     setQuestionIndex(0);
     setScores(baseScores);
     setLeadData(null);
@@ -337,32 +333,47 @@ function App() {
     setAnswerValues(defaultAnswerValues);
   };
 
-  return (
-    <main className="min-h-screen bg-gradient-to-br from-sand via-white to-cyan-50 px-4 py-8 text-slate-900">
-      <div className="mx-auto w-full max-w-3xl space-y-6">
-        <header className="rounded-2xl bg-white p-4 shadow-card sm:p-6">
-          <img src={logoUrl} alt="More FLA Homes" className="h-auto w-full max-w-xs" />
-          <h1 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">Relocation Match Quiz</h1>
-          <p className="mt-2 text-sm text-slate-600 sm:text-base">Answer targeted questions to reveal your top 3 Florida area matches across 30+ local markets.</p>
-        </header>
+  // If on landing page, show LandingPage component
+  if (stage === 'landing') {
+    return <LandingPage onStartQuiz={handleStartQuiz} />;
+  }
 
-        <AnimatePresence mode="wait">
-          {stage === 'quiz' && (
-            <motion.section
-              key={`question-${currentQuestion.id}`}
-              initial={{ opacity: 0, x: 28 }}
+  return (
+    <div className="min-h-screen bg-sand">
+      <header className="w-full border-b border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
+          <img src={logoUrl} alt="More FLA Homes" className="h-10 w-10" />
+          <div>
+            <p className="text-sm font-bold text-lagoon">More FLA Homes</p>
+            <p className="text-xs text-slate-500">Relocation Match Quiz</p>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-3xl px-4 py-8">
+        <div className="mb-6 rounded-xl border border-citrus/20 bg-citrus/5 px-4 py-3 text-center">
+          <h1 className="text-lg font-bold text-lagoon md:text-xl">Relocation Match Quiz</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Answer targeted questions to reveal your top 3 Florida area matches across 30+ local markets.
+          </p>
+        </div>
+
+        {stage === 'quiz' && (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={questionIndex}
+              initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -28 }}
-              transition={{ duration: 0.24, ease: 'easeInOut' }}
-              className="rounded-2xl bg-white p-6 shadow-card"
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.25 }}
+              className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card md:p-6"
             >
               <ProgressBar current={questionIndex + 1} total={activeQuestions.length} />
-              <h2 className="mt-6 text-xl font-semibold text-slate-900">{currentQuestion.prompt}</h2>
-              <div className="mt-5 grid gap-3">
+              <h2 className="mt-4 text-base font-semibold text-slate-800 md:text-lg">{currentQuestion.prompt}</h2>
+              <div className="mt-4 space-y-2">
                 {currentQuestion.options.map((option, optionIndex) => (
                   <button
-                    key={option.text}
-                    type="button"
+                    key={option.value}
                     onClick={() => handleSelectAnswer(optionIndex)}
                     className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-lagoon hover:bg-cyan-50"
                   >
@@ -370,27 +381,25 @@ function App() {
                   </button>
                 ))}
               </div>
-            </motion.section>
-          )}
+            </motion.div>
+          </AnimatePresence>
+        )}
 
-          {stage === 'lead' && (
-            <motion.section key="lead-capture" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.25 }} className="rounded-2xl bg-white p-6 shadow-card">
-              <h2 className="text-2xl font-bold text-slate-900">You are one step away from your top 3 matches</h2>
-              <p className="mt-2 text-slate-600">We scored your answers and filtered by budget, home size, and new-vs-resale fit. Share your info to unlock your ranked results.</p>
-              <div className="mt-6">
-                <LeadCaptureForm onSubmit={handleLeadSubmit} />
-              </div>
-            </motion.section>
-          )}
+        {stage === 'lead' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card md:p-6">
+            <h2 className="text-lg font-bold text-lagoon">You are one step away from your top 3 matches</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              We scored your answers and filtered by budget, home size, and new-vs-resale fit. Share your info to unlock your ranked results.
+            </p>
+            <LeadCaptureForm onSubmit={handleLeadSubmit} />
+          </motion.div>
+        )}
 
-          {stage === 'result' && leadData && (
-            <motion.section key="result" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.3 }}>
-              <ResultsCard rankedMatches={rankedMatches} leadData={leadData} insights={insights} timeline={leadData.timeline} onRestart={restartQuiz} />
-            </motion.section>
-          )}
-        </AnimatePresence>
-      </div>
-    </main>
+        {stage === 'result' && leadData && (
+          <ResultsCard rankedMatches={rankedMatches} insights={insights} leadData={leadData} onRestart={restartQuiz} />
+        )}
+      </main>
+    </div>
   );
 }
 
