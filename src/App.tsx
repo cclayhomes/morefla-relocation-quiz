@@ -396,7 +396,7 @@ function App() {
         )}
 
         {stage === 'result' && leadData && (
-          <ResultsCard rankedMatches={rankedMatches} insights={insights} leadData={leadData} onRestart={restartQuiz} />
+          <ResultsCard rankedMatches={rankedMatches} insights={insights} leadData={leadData} timeline={leadData.timeline} onRestart={restartQuiz} />
         )}
       </main>
     </div>
