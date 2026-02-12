@@ -100,7 +100,8 @@ export function LeadCaptureForm({ onSubmit }: LeadCaptureFormProps) {
           <option value="0-3 months">0-3 months</option>
           <option value="3-6 months">3-6 months</option>
           <option value="6-12 months">6-12 months</option>
-          <option value="just exploring">Just exploring</option>
+          <option value="12+ months">12+ months</option>
+          <option value="Just exploring">Just exploring</option>
         </select>
       </label>
       <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700">
