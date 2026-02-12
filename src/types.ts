@@ -1,4 +1,18 @@
-export type AreaKey = 'winterGarden' | 'lakeNona' | 'clermont' | 'winterPark';
+export const AREA_KEYS = [
+  'wesleyChapel',
+  'southTampa',
+  'stPete',
+  'polkCounty',
+  'lakewoodRanch',
+  'sarasota',
+  'winterGarden',
+  'lakeNona',
+  'clermont',
+  'kissimmee',
+  'winterPark'
+] as const;
+
+export type AreaKey = (typeof AREA_KEYS)[number];
 
 export interface AnswerOption {
   text: string;
@@ -26,4 +40,5 @@ export interface LeadFormData {
   email: string;
   phone: string;
   timeline: string;
+  wantsCommunityInfo: boolean;
 }

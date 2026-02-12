@@ -5,23 +5,19 @@ import { LeadCaptureForm } from './components/LeadCaptureForm';
 import { ProgressBar } from './components/ProgressBar';
 import { ResultsCard } from './components/ResultsCard';
 import { areaProfiles, questions } from './data/quizData';
-import { AreaKey, LeadFormData } from './types';
+import { AREA_KEYS, AreaKey, LeadFormData } from './types';
 
 type Stage = 'quiz' | 'lead' | 'result';
 
-const baseScores: Record<AreaKey, number> = {
-  winterGarden: 0,
-  lakeNona: 0,
-  clermont: 0,
-  winterPark: 0
-};
+const baseScores = AREA_KEYS.reduce((scores, key) => {
+  scores[key] = 0;
+  return scores;
+}, {} as Record<AreaKey, number>);
 
-const areaLabel: Record<AreaKey, string> = {
-  winterGarden: 'Winter Garden + Horizon West',
-  lakeNona: 'Lake Nona',
-  clermont: 'Clermont + South Lake',
-  winterPark: 'Winter Park + Maitland'
-};
+const areaLabel = AREA_KEYS.reduce((labels, key) => {
+  labels[key] = areaProfiles[key].title;
+  return labels;
+}, {} as Record<AreaKey, string>);
 
 function App() {
   const [stage, setStage] = useState<Stage>('quiz');
@@ -31,21 +27,25 @@ function App() {
 
   const currentQuestion = questions[questionIndex];
 
-  const bestMatch = useMemo(() => {
-    const ordered = Object.entries(scores).sort(([, a], [, b]) => b - a);
-    const winner = ordered[0]?.[0] as AreaKey | undefined;
-    return winner ? areaProfiles[winner] : areaProfiles.winterGarden;
-  }, [scores]);
+  const rankedMatches = useMemo(
+    () =>
+      Object.entries(scores)
+        .sort(([, a], [, b]) => b - a)
+        .map(([key]) => areaProfiles[key as AreaKey]),
+    [scores]
+  );
+
+  const topMatches = rankedMatches.slice(0, 2);
 
   const handleSelectAnswer = (optionIndex: number) => {
     const selectedOption = currentQuestion.options[optionIndex];
 
-    setScores((current) => ({
-      winterGarden: current.winterGarden + selectedOption.scores.winterGarden,
-      lakeNona: current.lakeNona + selectedOption.scores.lakeNona,
-      clermont: current.clermont + selectedOption.scores.clermont,
-      winterPark: current.winterPark + selectedOption.scores.winterPark
-    }));
+    setScores((current) =>
+      AREA_KEYS.reduce((nextScores, key) => {
+        nextScores[key] = current[key] + selectedOption.scores[key];
+        return nextScores;
+      }, {} as Record<AreaKey, number>)
+    );
 
     if (questionIndex === questions.length - 1) {
       setStage('lead');
@@ -74,7 +74,7 @@ function App() {
           <img src={logoUrl} alt="More FLA Homes" className="h-auto w-full max-w-xs" />
           <h1 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">Relocation Match Quiz</h1>
           <p className="mt-2 text-sm text-slate-600 sm:text-base">
-            Answer 10 quick questions to discover your best-fit Central Florida area.
+            Answer 12 quick questions to discover your best-fit More FLA area.
           </p>
         </header>
 
@@ -114,9 +114,9 @@ function App() {
               transition={{ duration: 0.25 }}
               className="rounded-2xl bg-white p-6 shadow-card"
             >
-              <h2 className="text-2xl font-bold text-slate-900">You are one step away from your match</h2>
+              <h2 className="text-2xl font-bold text-slate-900">You are one step away from your matches</h2>
               <p className="mt-2 text-slate-600">
-                We analyzed your answers. Share your info and we will reveal your personalized relocation result.
+                We analyzed your answers across all More FLA markets. Share your info to see your top Florida matches.
               </p>
               <div className="mt-6">
                 <LeadCaptureForm onSubmit={handleLeadSubmit} />
@@ -133,7 +133,7 @@ function App() {
               transition={{ duration: 0.3 }}
             >
               <ResultsCard
-                profile={bestMatch}
+                topMatches={topMatches}
                 scoreBreakdown={scores}
                 areaLabel={areaLabel}
                 leadData={leadData}
