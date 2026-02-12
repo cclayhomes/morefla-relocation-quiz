@@ -5,10 +5,27 @@ import { LeadCaptureForm } from './components/LeadCaptureForm';
 import { ProgressBar } from './components/ProgressBar';
 import { ResultsCard } from './components/ResultsCard';
 import { areaProfiles, filterByConstruction, filterBySize, getBudgetAllowedAreas, questions } from './data/quizData';
+import { sendEvent } from './utils/analytics';
 import { AREA_KEYS, AreaKey, BudgetBracket, ConstructionPreference, LeadFormData, QuizOption, SizeNeed } from './types';
 
 type Stage = 'quiz' | 'lead' | 'result';
 type WeeklyPreference = 'tampa' | 'pinellas' | 'sarasota' | 'orlando' | 'remote';
+type AnswerMap = {
+  q1_lifestyle: string;
+  q2_weekday: string;
+  q3_commute: string;
+  q4_budget: string;
+  q5_schools: string;
+  q6_fees: string;
+};
+
+type UtmParams = {
+  utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_content: string;
+  utm_term: string;
+};
 
 const baseScores = AREA_KEYS.reduce((scores, key) => {
   scores[key] = 0;
@@ -16,6 +33,42 @@ const baseScores = AREA_KEYS.reduce((scores, key) => {
 }, {} as Record<AreaKey, number>);
 
 const schoolScores = { 'A+': 3, A: 2.5, 'A-': 2, 'B+': 1, B: 0.5, 'B-': 0 };
+
+const defaultAnswers: AnswerMap = {
+  q1_lifestyle: '',
+  q2_weekday: '',
+  q3_commute: '',
+  q4_budget: '',
+  q5_schools: '',
+  q6_fees: ''
+};
+
+const questionToAnswerKey: Record<number, keyof AnswerMap> = {
+  1: 'q1_lifestyle',
+  2: 'q2_weekday',
+  3: 'q3_commute',
+  4: 'q4_budget',
+  5: 'q5_schools',
+  6: 'q6_fees'
+};
+
+const formatTagValue = (value: string) =>
+  value
+    .trim()
+    .replace(/\+/g, 'plus')
+    .replace(/\s+/g, '')
+    .replace(/[^a-zA-Z0-9_-]/g, '');
+
+const readInitialUtms = (): UtmParams => {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    utm_source: params.get('utm_source') ?? '',
+    utm_medium: params.get('utm_medium') ?? '',
+    utm_campaign: params.get('utm_campaign') ?? '',
+    utm_content: params.get('utm_content') ?? '',
+    utm_term: params.get('utm_term') ?? ''
+  };
+};
 
 function App() {
   const [stage, setStage] = useState<Stage>('quiz');
@@ -27,6 +80,8 @@ function App() {
   const [constructionChoice] = useState<ConstructionPreference>('either');
   const [insights, setInsights] = useState<string[]>([]);
   const [weeklyPreference, setWeeklyPreference] = useState<WeeklyPreference>('remote');
+  const [answers, setAnswers] = useState<AnswerMap>(defaultAnswers);
+  const [utmParams] = useState<UtmParams>(() => readInitialUtms());
 
   const currentQuestion = questions[questionIndex];
 
@@ -116,6 +171,17 @@ function App() {
   const handleSelectAnswer = (optionIndex: number) => {
     const selectedOption = currentQuestion.options[optionIndex];
 
+    if (questionIndex === 0) {
+      sendEvent('quiz_start', { questionId: currentQuestion.id });
+    }
+
+    sendEvent('quiz_answer', { questionId: currentQuestion.id, value: selectedOption.value });
+
+    setAnswers((current) => ({
+      ...current,
+      [questionToAnswerKey[currentQuestion.id]]: selectedOption.value
+    }));
+
     setScores((current) => {
       const next = { ...current };
       scoreQuestion(currentQuestion.id, selectedOption, next);
@@ -128,6 +194,7 @@ function App() {
     if (selectedOption.insight) setInsights((current) => (current.includes(selectedOption.insight!) ? current : [...current, selectedOption.insight!]));
 
     if (questionIndex === questions.length - 1) {
+      sendEvent('quiz_complete', { answers: { ...answers, [questionToAnswerKey[currentQuestion.id]]: selectedOption.value } });
       setStage('lead');
       return;
     }
@@ -137,6 +204,67 @@ function App() {
   const handleLeadSubmit = (form: LeadFormData) => {
     setLeadData(form);
     setStage('result');
+    sendEvent('lead_submit', { timeline: form.timeline, wantsCommunityInfo: form.wantsCommunityInfo });
+
+    const topMatches = rankedMatches.slice(0, 3).map((match) => ({
+      area: match.area.title,
+      region: match.area.region,
+      score: match.score,
+      medianPrice: match.area.medianPrice,
+      key: match.area.key
+    }));
+
+    const tags = [
+      'SRC_RelocationQuiz',
+      `INT_Timeline_${formatTagValue(form.timeline)}`,
+      `PREF_Lifestyle_${formatTagValue(answers.q1_lifestyle)}`,
+      `PREF_Schools_${formatTagValue(answers.q5_schools)}`,
+      `PREF_HOA_${formatTagValue(answers.q6_fees)}`,
+      `PREF_Commute_${formatTagValue(answers.q3_commute)}`,
+      `PREF_Budget_${formatTagValue(answers.q4_budget)}`,
+      `PREF_WorkHub_${formatTagValue(answers.q2_weekday)}`,
+      ...topMatches.map((match) => `MATCH_${match.key}`),
+      ...(form.wantsCommunityInfo ? ['OPT_CommunityInfo_Yes'] : [])
+    ];
+
+    const webhookUrl = import.meta.env.VITE_WEBHOOK_URL?.trim();
+    if (!webhookUrl) {
+      return;
+    }
+
+    const payload = {
+      timestamp: new Date().toISOString(),
+      source: 'morefla-relocation-quiz',
+      lead: {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        timeline: form.timeline,
+        wantsCommunityInfo: form.wantsCommunityInfo
+      },
+      answers,
+      topMatches: topMatches.map(({ key, ...match }) => match),
+      insights,
+      tags,
+      metadata: {
+        userAgent: window.navigator.userAgent,
+        referrer: document.referrer,
+        pageUrl: window.location.href,
+        ...utmParams
+      }
+    };
+
+    fetch(webhookUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    }).catch(() => {
+      // fire-and-forget by design
+    });
   };
 
   const restartQuiz = () => {
@@ -147,6 +275,7 @@ function App() {
     setBudgetChoice('400to500');
     setInsights([]);
     setWeeklyPreference('remote');
+    setAnswers(defaultAnswers);
   };
 
   return (
@@ -197,7 +326,7 @@ function App() {
 
           {stage === 'result' && leadData && (
             <motion.section key="result" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.3 }}>
-              <ResultsCard rankedMatches={rankedMatches} leadData={leadData} insights={insights} onRestart={restartQuiz} />
+              <ResultsCard rankedMatches={rankedMatches} leadData={leadData} insights={insights} timeline={leadData.timeline} onRestart={restartQuiz} />
             </motion.section>
           )}
         </AnimatePresence>

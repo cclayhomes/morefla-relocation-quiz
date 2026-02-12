@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { AreaProfile, LeadFormData } from '../types';
+import { sendEvent } from '../utils/analytics';
 
 interface RankedArea {
   area: AreaProfile;
@@ -9,6 +11,7 @@ interface ResultsCardProps {
   rankedMatches: RankedArea[];
   leadData: LeadFormData;
   insights: string[];
+  timeline: string;
   onRestart: () => void;
 }
 
@@ -16,8 +19,13 @@ function formatPrice(price: number) {
   return `$${(price / 1000).toFixed(0)}K`;
 }
 
-export function ResultsCard({ rankedMatches, leadData, insights, onRestart }: ResultsCardProps) {
+export function ResultsCard({ rankedMatches, leadData, insights, timeline, onRestart }: ResultsCardProps) {
   const topThree = rankedMatches.slice(0, 3);
+  const isUrgentTimeline = timeline === '0-3 months' || timeline === '3-6 months';
+
+  useEffect(() => {
+    sendEvent('results_view', { timeline, topMatches: topThree.map((item) => item.area.key) });
+  }, [timeline, topThree]);
 
   return (
     <div className="space-y-6">
@@ -68,9 +76,50 @@ export function ResultsCard({ rankedMatches, leadData, insights, onRestart }: Re
           <strong>{leadData.timeline}</strong> timeline.
         </p>
         {leadData.wantsCommunityInfo && topThree.length > 0 && (
-          <p className="mt-2">
-            Perfect—we will include the best communities in your top areas: <strong>{topThree.map((item) => item.area.title).join(', ')}</strong>.
-          </p>
+          <>
+            <p className="mt-2">
+              Perfect—we will include the best communities in your top areas: <strong>{topThree.map((item) => item.area.title).join(', ')}</strong>.
+            </p>
+            <a
+              href="https://calendly.com/morefla"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => sendEvent('guide_request', { topAreas: topThree.map((item) => item.area.key) })}
+              className="mt-3 inline-flex text-sm font-semibold text-lagoon underline-offset-2 hover:underline"
+            >
+              Request your community guide
+            </a>
+          </>
+        )}
+      </div>
+
+      <div className="rounded-2xl bg-white p-6 shadow-card">
+        {isUrgentTimeline ? (
+          <>
+            <h3 className="text-xl font-bold text-slate-900">Ready to explore your top areas?</h3>
+            <a
+              href="https://calendly.com/morefla"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => sendEvent('booking_click', { timeline, variant: 'prominent' })}
+              className="mt-4 inline-flex rounded-xl bg-lagoon px-5 py-3 font-semibold text-white transition hover:brightness-110"
+            >
+              Book a Free 15-Min Relocation Call
+            </a>
+          </>
+        ) : (
+          <>
+            <h3 className="text-lg font-semibold text-slate-900">When you're ready, we're here</h3>
+            <a
+              href="https://calendly.com/morefla"
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => sendEvent('booking_click', { timeline, variant: 'soft' })}
+              className="mt-2 inline-flex text-sm text-lagoon underline-offset-2 hover:underline"
+            >
+              Book a Free 15-Min Relocation Call
+            </a>
+          </>
         )}
       </div>
 
