@@ -1,71 +1,74 @@
 import { AreaKey, AreaProfile, LeadFormData } from '../types';
 
+interface RankedArea {
+  area: AreaProfile;
+  score: number;
+}
+
 interface ResultsCardProps {
-  topMatches: AreaProfile[];
+  rankedMatches: RankedArea[];
   scoreBreakdown: Record<AreaKey, number>;
-  areaLabel: Record<AreaKey, string>;
   leadData: LeadFormData;
+  insights: string[];
   onRestart: () => void;
 }
 
-export function ResultsCard({ topMatches, scoreBreakdown, areaLabel, leadData, onRestart }: ResultsCardProps) {
-  const rankedAreas = Object.entries(scoreBreakdown)
-    .sort(([, a], [, b]) => b - a)
-    .map(([key, score]) => ({ key: key as AreaKey, score }));
+function formatPrice(price: number) {
+  return `$${(price / 1000).toFixed(0)}K`;
+}
 
-  const [primaryMatch, secondaryMatch] = topMatches;
+export function ResultsCard({ rankedMatches, scoreBreakdown, leadData, insights, onRestart }: ResultsCardProps) {
+  const topThree = rankedMatches.slice(0, 3);
 
   return (
     <div className="space-y-6">
       <div className="rounded-2xl bg-lagoon p-6 text-white shadow-card">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">Your Top 2 Matches</p>
-        <h2 className="mt-2 text-3xl font-bold">{primaryMatch.title}</h2>
-        <p className="mt-1 text-cyan-100">{primaryMatch.subtitle}</p>
-        <p className="mt-4 text-slate-100">{primaryMatch.vibe}</p>
-        <p className="mt-4 rounded-lg bg-white/10 p-3 text-sm">{primaryMatch.callout}</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-200">Your top 3 relocation matches</p>
+        <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Smart-matched to your budget, size, and lifestyle priorities</h2>
+        <p className="mt-2 text-sm text-cyan-100">
+          We filtered out areas that do not fit your pricing and home-size requirements, then ranked the strongest market fits.
+        </p>
       </div>
 
-      {secondaryMatch && (
-        <div className="rounded-2xl bg-white p-6 shadow-card">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-lagoon">Second Match</p>
-          <h3 className="mt-2 text-2xl font-bold text-slate-900">{secondaryMatch.title}</h3>
-          <p className="mt-1 text-slate-600">{secondaryMatch.subtitle}</p>
-          <p className="mt-3 text-slate-700">{secondaryMatch.vibe}</p>
-          <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">{secondaryMatch.callout}</p>
-        </div>
-      )}
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl bg-white p-6 shadow-card">
-          <h3 className="text-lg font-semibold text-slate-900">Why {primaryMatch.title} fits you</h3>
-          <ul className="mt-3 list-inside list-disc space-y-2 text-slate-700">
-            {primaryMatch.highlights.map((highlight) => (
-              <li key={highlight}>{highlight}</li>
-            ))}
-          </ul>
-        </div>
-
-        {secondaryMatch && (
-          <div className="rounded-2xl bg-white p-6 shadow-card">
-            <h3 className="text-lg font-semibold text-slate-900">Why {secondaryMatch.title} also stands out</h3>
-            <ul className="mt-3 list-inside list-disc space-y-2 text-slate-700">
-              {secondaryMatch.highlights.map((highlight) => (
+      <div className="grid gap-4">
+        {topThree.map((match, index) => (
+          <article key={match.area.key} className="rounded-2xl bg-white p-5 shadow-card">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-lagoon">#{index + 1} match • {match.area.region}</p>
+                <h3 className="text-xl font-bold text-slate-900">{match.area.title}</h3>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-semibold text-slate-700">{match.score} points</p>
+                <p className="text-sm text-slate-600">2025 median: {formatPrice(match.area.medianPrice)}</p>
+                <p className="text-sm text-slate-600">School rating: {match.area.schoolRating}</p>
+              </div>
+            </div>
+            <ul className="mt-4 list-inside list-disc space-y-1 text-sm text-slate-700">
+              {match.area.highlights.map((highlight) => (
                 <li key={highlight}>{highlight}</li>
               ))}
             </ul>
-          </div>
-        )}
+          </article>
+        ))}
       </div>
 
       <div className="rounded-2xl bg-white p-6 shadow-card">
-        <h3 className="text-lg font-semibold text-slate-900">Complete area ranking</h3>
+        <h3 className="text-lg font-semibold text-slate-900">Area-specific insights from your answers</h3>
+        <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-slate-700">
+          {insights.slice(0, 4).map((insight) => (
+            <li key={insight}>{insight}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="rounded-2xl bg-white p-6 shadow-card">
+        <h3 className="text-lg font-semibold text-slate-900">Filtered ranking across qualifying areas</h3>
         <div className="mt-3 space-y-2">
-          {rankedAreas.map((area, index) => (
-            <div key={area.key} className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2 text-sm">
-              <span className="font-medium text-slate-700">
-                #{index + 1} {areaLabel[area.key]}
-              </span>
-              <span className="font-semibold text-lagoon">{area.score} pts</span>
+          {rankedMatches.map((match, index) => (
+            <div key={match.area.key} className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-2 text-sm">
+              <span className="font-medium text-slate-700">#{index + 1} {match.area.title}</span>
+              <span className="font-semibold text-lagoon">{scoreBreakdown[match.area.key]} pts</span>
             </div>
           ))}
         </div>
@@ -74,13 +77,12 @@ export function ResultsCard({ topMatches, scoreBreakdown, areaLabel, leadData, o
       <div className="rounded-2xl border border-dashed border-lagoon/40 bg-white p-6 text-sm text-slate-700">
         <p className="font-medium text-slate-900">Thanks, {leadData.firstName}!</p>
         <p className="mt-2">
-          A relocation specialist will contact you at <strong>{leadData.email}</strong> with next steps aligned to your{' '}
+          Your specialist will send your relocation summary to <strong>{leadData.email}</strong> and follow up on your{' '}
           <strong>{leadData.timeline}</strong> timeline.
         </p>
-        {leadData.wantsCommunityInfo && secondaryMatch && (
+        {leadData.wantsCommunityInfo && topThree.length > 0 && (
           <p className="mt-2">
-            A More FLA specialist will reach out with top community picks in <strong>{primaryMatch.title}</strong> and{' '}
-            <strong>{secondaryMatch.title}</strong>.
+            Perfect—we will include the best communities in your top areas: <strong>{topThree.map((item) => item.area.title).join(', ')}</strong>.
           </p>
         )}
       </div>

@@ -4,8 +4,15 @@ import logoUrl from './assets/more-fla-logo.svg';
 import { LeadCaptureForm } from './components/LeadCaptureForm';
 import { ProgressBar } from './components/ProgressBar';
 import { ResultsCard } from './components/ResultsCard';
-import { areaProfiles, questions } from './data/quizData';
-import { AREA_KEYS, AreaKey, LeadFormData } from './types';
+import {
+  areaProfiles,
+  filterByConstruction,
+  filterBySize,
+  getBudgetAllowedAreas,
+  questions,
+  tagWeights
+} from './data/quizData';
+import { AREA_KEYS, AreaKey, BudgetBracket, ConstructionPreference, LeadFormData, ScoreTag, SizeNeed } from './types';
 
 type Stage = 'quiz' | 'lead' | 'result';
 
@@ -14,38 +21,66 @@ const baseScores = AREA_KEYS.reduce((scores, key) => {
   return scores;
 }, {} as Record<AreaKey, number>);
 
-const areaLabel = AREA_KEYS.reduce((labels, key) => {
-  labels[key] = areaProfiles[key].title;
-  return labels;
-}, {} as Record<AreaKey, string>);
-
 function App() {
   const [stage, setStage] = useState<Stage>('quiz');
   const [questionIndex, setQuestionIndex] = useState(0);
   const [scores, setScores] = useState<Record<AreaKey, number>>(baseScores);
   const [leadData, setLeadData] = useState<LeadFormData | null>(null);
+  const [budgetChoice, setBudgetChoice] = useState<BudgetBracket>('400to500');
+  const [sizeChoice, setSizeChoice] = useState<SizeNeed>(2000);
+  const [constructionChoice, setConstructionChoice] = useState<ConstructionPreference>('either');
+  const [insights, setInsights] = useState<string[]>([]);
 
   const currentQuestion = questions[questionIndex];
 
-  const rankedMatches = useMemo(
-    () =>
-      Object.entries(scores)
-        .sort(([, a], [, b]) => b - a)
-        .map(([key]) => areaProfiles[key as AreaKey]),
-    [scores]
-  );
+  const rankedMatches = useMemo(() => {
+    const budgetAllowed = getBudgetAllowedAreas(budgetChoice);
 
-  const topMatches = rankedMatches.slice(0, 2);
+    return AREA_KEYS.map((key) => ({ area: areaProfiles[key], score: scores[key] }))
+      .filter((item) => budgetAllowed.has(item.area.key))
+      .filter((item) => filterBySize(item.area, sizeChoice))
+      .filter((item) => filterByConstruction(item.area, constructionChoice))
+      .sort((a, b) => b.score - a.score || a.area.medianPrice - b.area.medianPrice);
+  }, [scores, budgetChoice, sizeChoice, constructionChoice]);
+
+  const applyTagBoosts = (tagBoosts: Partial<Record<ScoreTag, number>> = {}) => {
+    setScores((current) => {
+      const nextScores = { ...current };
+
+      Object.entries(tagBoosts).forEach(([tag, strength]) => {
+        const boostValue = strength ?? 0;
+        const areas = tagWeights[tag as ScoreTag] ?? {};
+
+        Object.entries(areas).forEach(([areaKey, points]) => {
+          nextScores[areaKey as AreaKey] += points * boostValue;
+        });
+      });
+
+      return nextScores;
+    });
+  };
 
   const handleSelectAnswer = (optionIndex: number) => {
     const selectedOption = currentQuestion.options[optionIndex];
 
-    setScores((current) =>
-      AREA_KEYS.reduce((nextScores, key) => {
-        nextScores[key] = current[key] + selectedOption.scores[key];
-        return nextScores;
-      }, {} as Record<AreaKey, number>)
-    );
+    applyTagBoosts(selectedOption.tagBoosts);
+
+    if (selectedOption.budgetValue) {
+      setBudgetChoice(selectedOption.budgetValue);
+    }
+
+    if (selectedOption.sizeValue) {
+      setSizeChoice(selectedOption.sizeValue);
+    }
+
+    if (selectedOption.constructionValue) {
+      setConstructionChoice(selectedOption.constructionValue);
+    }
+
+    if (selectedOption.insight) {
+      const nextInsight = selectedOption.insight;
+      setInsights((current) => (current.includes(nextInsight) ? current : [...current, nextInsight]));
+    }
 
     if (questionIndex === questions.length - 1) {
       setStage('lead');
@@ -65,6 +100,10 @@ function App() {
     setQuestionIndex(0);
     setScores(baseScores);
     setLeadData(null);
+    setBudgetChoice('400to500');
+    setSizeChoice(2000);
+    setConstructionChoice('either');
+    setInsights([]);
   };
 
   return (
@@ -74,7 +113,7 @@ function App() {
           <img src={logoUrl} alt="More FLA Homes" className="h-auto w-full max-w-xs" />
           <h1 className="mt-4 text-2xl font-bold text-slate-900 sm:text-3xl">Relocation Match Quiz</h1>
           <p className="mt-2 text-sm text-slate-600 sm:text-base">
-            Answer 12 quick questions to discover your best-fit More FLA area.
+            Answer 8 quick questions to reveal your top 3 Florida area matches across 30+ local markets.
           </p>
         </header>
 
@@ -114,9 +153,9 @@ function App() {
               transition={{ duration: 0.25 }}
               className="rounded-2xl bg-white p-6 shadow-card"
             >
-              <h2 className="text-2xl font-bold text-slate-900">You are one step away from your matches</h2>
+              <h2 className="text-2xl font-bold text-slate-900">You are one step away from your top 3 matches</h2>
               <p className="mt-2 text-slate-600">
-                We analyzed your answers across all More FLA markets. Share your info to see your top Florida matches.
+                We scored your answers and filtered by budget, home size, and new-vs-resale fit. Share your info to unlock your ranked results.
               </p>
               <div className="mt-6">
                 <LeadCaptureForm onSubmit={handleLeadSubmit} />
@@ -132,13 +171,7 @@ function App() {
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.3 }}
             >
-              <ResultsCard
-                topMatches={topMatches}
-                scoreBreakdown={scores}
-                areaLabel={areaLabel}
-                leadData={leadData}
-                onRestart={restartQuiz}
-              />
+              <ResultsCard rankedMatches={rankedMatches} scoreBreakdown={scores} leadData={leadData} insights={insights} onRestart={restartQuiz} />
             </motion.section>
           )}
         </AnimatePresence>
