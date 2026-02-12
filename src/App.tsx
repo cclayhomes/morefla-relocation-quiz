@@ -5,49 +5,48 @@ import { LeadCaptureForm } from './components/LeadCaptureForm';
 import { LandingPage } from './components/LandingPage';
 import { ProgressBar } from './components/ProgressBar';
 import { ResultsCard } from './components/ResultsCard';
-import { areaProfiles, filterByConstruction, filterBySize, getBudgetAllowedAreas, questions } from './data/quizData';
-import { AREA_KEYS, AreaKey, BudgetBracket, ConstructionPreference, LeadFormData, QuizOption, SizeNeed } from './types';
+import {
+  areaProfiles,
+  ecosystemAreas,
+  ecosystemLabels,
+  filterByConstruction,
+  filterBySize,
+  getBudgetAllowedAreas,
+  questions
+} from './data/quizData';
+import { AreaKey, BudgetBracket, ConstructionPreference, EcosystemKey, LeadFormData, SizeNeed } from './types';
 import { sendEvent } from './utils/analytics';
 
-type Stage = 'landing' | 'quiz' | 'lead' | 'result';
+type Stage = 'landing' | 'quiz' | 'clarify' | 'lead' | 'result';
 
-type AnswerMap = {
-  q1_schools_importance: string;
-  q2_school_priority: string;
-  q3_work_location: string;
-  q4_commute_tolerance: string;
-  q5_visitor_frequency: string;
-  q6_weekend_activity: string;
-  q7_neighborhood_type: string;
-  q8_hoa_preference: string;
-  q9_airport_access: string;
-  q10_dining_preference: string;
-  q11_budget: string;
-  q12_home_size: string;
-  q13_construction_type: string;
-};
+type AnswerMap = Record<
+  | 'q1_schools_importance'
+  | 'q2_school_priority'
+  | 'q3_work_location'
+  | 'q4_commute_tolerance'
+  | 'q5_theme_park_relevance'
+  | 'q6_weekend_activity'
+  | 'q7_neighborhood_type'
+  | 'q8_hoa_preference'
+  | 'q9_airport_access'
+  | 'q10_dining_preference'
+  | 'q11_budget'
+  | 'q12_home_size'
+  | 'q13_construction_type'
+  | 'q14_coastal_comfort'
+  | 'q15_exploration_openness',
+  string
+>;
 
-type UtmParams = {
-  utm_source: string;
-  utm_medium: string;
-  utm_campaign: string;
-  utm_content: string;
-  utm_term: string;
-};
-
-const baseScores = AREA_KEYS.reduce((scores, key) => {
-  scores[key] = 0;
-  return scores;
-}, {} as Record<AreaKey, number>);
-
-const schoolScores = { 'A+': 3, A: 2.5, 'A-': 2, 'B+': 1, B: 0.5, 'B-': 0 };
+type UtmParams = Record<'utm_source' | 'utm_medium' | 'utm_campaign' | 'utm_content' | 'utm_term', string>;
+type Clarification = 'themeParks' | 'coastal' | 'balanced' | '';
 
 const defaultAnswerValues: AnswerMap = {
   q1_schools_importance: '',
   q2_school_priority: '',
   q3_work_location: '',
   q4_commute_tolerance: '',
-  q5_visitor_frequency: '',
+  q5_theme_park_relevance: '',
   q6_weekend_activity: '',
   q7_neighborhood_type: '',
   q8_hoa_preference: '',
@@ -55,7 +54,9 @@ const defaultAnswerValues: AnswerMap = {
   q10_dining_preference: '',
   q11_budget: '',
   q12_home_size: '',
-  q13_construction_type: ''
+  q13_construction_type: '',
+  q14_coastal_comfort: '',
+  q15_exploration_openness: ''
 };
 
 const questionToAnswerKey: Record<number, keyof AnswerMap> = {
@@ -63,7 +64,7 @@ const questionToAnswerKey: Record<number, keyof AnswerMap> = {
   2: 'q2_school_priority',
   3: 'q3_work_location',
   4: 'q4_commute_tolerance',
-  5: 'q5_visitor_frequency',
+  5: 'q5_theme_park_relevance',
   6: 'q6_weekend_activity',
   7: 'q7_neighborhood_type',
   8: 'q8_hoa_preference',
@@ -71,7 +72,9 @@ const questionToAnswerKey: Record<number, keyof AnswerMap> = {
   10: 'q10_dining_preference',
   11: 'q11_budget',
   12: 'q12_home_size',
-  13: 'q13_construction_type'
+  13: 'q13_construction_type',
+  14: 'q14_coastal_comfort',
+  15: 'q15_exploration_openness'
 };
 
 const answerTagPrefixes: Record<keyof AnswerMap, string> = {
@@ -79,7 +82,7 @@ const answerTagPrefixes: Record<keyof AnswerMap, string> = {
   q2_school_priority: 'PREF_SchoolPriority',
   q3_work_location: 'PREF_WorkLocation',
   q4_commute_tolerance: 'PREF_CommuteTolerance',
-  q5_visitor_frequency: 'PREF_VisitorFrequency',
+  q5_theme_park_relevance: 'PREF_ThemeParkRelevance',
   q6_weekend_activity: 'PREF_WeekendActivity',
   q7_neighborhood_type: 'PREF_NeighborhoodType',
   q8_hoa_preference: 'PREF_HOA',
@@ -87,16 +90,13 @@ const answerTagPrefixes: Record<keyof AnswerMap, string> = {
   q10_dining_preference: 'PREF_DiningPreference',
   q11_budget: 'PREF_Budget',
   q12_home_size: 'PREF_HomeSize',
-  q13_construction_type: 'PREF_ConstructionType'
+  q13_construction_type: 'PREF_ConstructionType',
+  q14_coastal_comfort: 'PREF_CoastalComfort',
+  q15_exploration_openness: 'PREF_Exploration'
 };
 
-const formatTagValue = (value: string) =>
-  value
-    .trim()
-    .replace(/\+/g, 'plus')
-    .replace(/\s+/g, '')
-    .replace(/[^a-zA-Z0-9_-]/g, '');
-
+const formatTagValue = (value: string) => value.trim().replace(/\+/g, 'plus').replace(/\s+/g, '').replace(/[^a-zA-Z0-9_-]/g, '');
+const shouldSkipLanding = () => new URLSearchParams(window.location.search).get('start') === 'quiz' || window.location.hash === '#quiz';
 const readInitialUtms = (): UtmParams => {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -108,140 +108,168 @@ const readInitialUtms = (): UtmParams => {
   };
 };
 
-// Check if URL has ?start=quiz or #quiz to skip landing
-const shouldSkipLanding = (): boolean => {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('start') === 'quiz' || window.location.hash === '#quiz';
-};
-
 function getActiveQuestions(skipSchoolPriority: boolean) {
   return questions.filter((q) => !(skipSchoolPriority && q.id === 2));
 }
 
 function App() {
-  const [stage, setStage] = useState<Stage>(() => shouldSkipLanding() ? 'quiz' : 'landing');
+  const [stage, setStage] = useState<Stage>(() => (shouldSkipLanding() ? 'quiz' : 'landing'));
   const [questionIndex, setQuestionIndex] = useState(0);
-  const [scores, setScores] = useState<Record<AreaKey, number>>(baseScores);
   const [leadData, setLeadData] = useState<LeadFormData | null>(null);
   const [budgetChoice, setBudgetChoice] = useState<BudgetBracket>('400to500');
   const [sizeChoice, setSizeChoice] = useState<SizeNeed>(2000);
   const [constructionChoice, setConstructionChoice] = useState<ConstructionPreference>('either');
   const [insights, setInsights] = useState<string[]>([]);
   const [skipSchoolPriority, setSkipSchoolPriority] = useState(false);
-  const [workPreference, setWorkPreference] = useState('remote');
   const [answerValues, setAnswerValues] = useState<AnswerMap>(defaultAnswerValues);
   const [utmParams] = useState<UtmParams>(() => readInitialUtms());
+  const [clarification, setClarification] = useState<Clarification>('');
 
   const activeQuestions = useMemo(() => getActiveQuestions(skipSchoolPriority), [skipSchoolPriority]);
   const currentQuestion = activeQuestions[questionIndex];
 
-  const rankedMatches = useMemo(() => {
-    const budgetAllowed = getBudgetAllowedAreas(budgetChoice);
-    return AREA_KEYS.map((key) => ({ area: areaProfiles[key], score: scores[key] }))
-      .filter((item) => budgetAllowed.has(item.area.key))
-      .filter((item) => filterBySize(item.area, sizeChoice))
-      .filter((item) => filterByConstruction(item.area, constructionChoice))
-      .sort((a, b) => b.score - a.score || a.area.medianPrice - b.area.medianPrice);
-  }, [scores, budgetChoice, sizeChoice, constructionChoice]);
+  const scoringResult = useMemo(() => {
+    const ecosystemScores: Record<EcosystemKey, number> = {
+      orlandoCore: 0,
+      tampaBayCore: 0,
+      pinellasStPete: 0,
+      sarasotaLakewoodRanch: 0,
+      polkCounty: 0
+    };
 
-  const addPoints = (areaKeys: AreaKey[], points: number, current: Record<AreaKey, number>) => {
-    areaKeys.forEach((key) => {
-      current[key] += points;
-    });
-  };
+    const add = (key: EcosystemKey, points: number) => {
+      ecosystemScores[key] += points;
+    };
 
-  const scoreQuestion = (questionId: number, selected: QuizOption, current: Record<AreaKey, number>) => {
-    AREA_KEYS.forEach((key) => {
-      const area = areaProfiles[key];
-      if (questionId === 1 && selected.value !== 'noKids') current[key] += schoolScores[area.schoolRating];
-      if (questionId === 2 && selected.value === 'solid' && ['A+', 'A', 'A-'].includes(area.schoolRating)) current[key] += 1.5;
-      if (questionId === 3) {
-        if (selected.value === 'orlando') current[key] += area.commuteOrlando === 'close' ? 3 : area.commuteOrlando === 'medium' ? 1 : 0;
-        if (selected.value === 'tampa') current[key] += area.commuteTampa === 'close' ? 3 : area.commuteTampa === 'medium' ? 1 : 0;
-        if (selected.value === 'i4') current[key] += area.commuteI4 === 'close' ? 3 : area.commuteI4 === 'medium' ? 1 : 0;
-      }
-      if (questionId === 4) {
-        const map = workPreference === 'orlando' ? area.commuteOrlando : workPreference === 'tampa' ? area.commuteTampa : area.commuteI4;
-        if (selected.value === 'under20') current[key] += map === 'close' ? 3 : 0;
-        if (selected.value === '20to35') current[key] += map === 'close' ? 2 : map === 'medium' ? 2 : 0;
-        if (selected.value === '35to45') current[key] += map !== 'far' ? 1.5 : 1;
-      }
-      if (questionId === 5 && selected.value === 'constantly') current[key] += area.nearAttractions ? 2 : 0;
-      if (questionId === 6) {
-        if (selected.value === 'water') current[key] += area.waterAccess === 'excellent' ? 3 : area.waterAccess === 'good' ? 1 : 0;
-        if (selected.value === 'golf' && area.golfCommunities) current[key] += 2;
-        if (selected.value === 'downtown' && area.downtownWalkable) current[key] += 2;
-        if (selected.value === 'markets' && area.farmersMarkets) current[key] += 2;
-        if (selected.value === 'trails' && area.natureTrails) current[key] += 2;
-        if (selected.value === 'quiet') current[key] += area.hoaLevel === 'none' ? 2 : 0;
-      }
-      if (questionId === 7) {
-        if (selected.value === 'new' && area.neighborhoodType === 'new') current[key] += 2;
-        if (selected.value === 'established' && area.neighborhoodType === 'established') current[key] += 2;
-        if (selected.value === 'mix' && area.neighborhoodType === 'mixed') current[key] += 1.5;
-      }
-      if (questionId === 8) {
-        if (selected.value === 'full' && area.hoaLevel === 'full') current[key] += 2;
-        if (selected.value === 'light' && (area.hoaLevel === 'light' || area.hoaLevel === 'mixed')) current[key] += 1.5;
-        if (selected.value === 'none' && area.hoaLevel === 'none') current[key] += 2;
-      }
-      if (questionId === 9) {
-        const bestAirport = Math.min(area.airportMCO, area.airportTPA, area.airportSRQ);
-        if (selected.value === 'very') current[key] += bestAirport <= 30 ? 3 : bestAirport <= 45 ? 1 : 0;
-        if (selected.value === 'somewhat') current[key] += bestAirport <= 45 ? 2 : 1;
-      }
-      if (questionId === 10) {
-        if (selected.value === area.diningStyle) current[key] += 2;
-        if (selected.value === 'mixed' && area.diningStyle === 'mixed') current[key] += 1;
-      }
-    });
-    if (questionId === 2 && selected.value === 'academics') addPoints(['winterParkMaitland', 'lakeNona', 'lakewoodRanch', 'windermere'], 3, current);
-    if (questionId === 2 && selected.value === 'sports') addPoints(['wesleyChapelNewTampa', 'lakewoodRanch', 'brandon'], 3, current);
-    if (questionId === 2 && selected.value === 'private') addPoints(['winterParkMaitland', 'southTampa', 'lakeNona', 'drPhillips'], 3, current);
-    if (questionId === 3 && selected.value === 'orlando') addPoints(['winterGarden', 'lakeNona', 'winterParkMaitland', 'apopka', 'sanford'], 3, current);
-    if (questionId === 3 && selected.value === 'tampa') addPoints(['wesleyChapelNewTampa', 'brandon', 'riverview', 'southTampa', 'landOLakes'], 3, current);
-    if (questionId === 3 && selected.value === 'i4') addPoints(['lakeland', 'winterHaven', 'hainesCity', 'plantCity', 'auburndale'], 3, current);
-    if (questionId === 5 && selected.value === 'constantly') {
-      addPoints(['kissimmeeStCloud', 'davenport', 'celebration', 'winterGarden'], 3, current);
-      addPoints(['stPetersburg', 'clearwater', 'sarasota'], 2, current);
+    const work = answerValues.q3_work_location;
+    if (work === 'orlando') add('orlandoCore', 5);
+    if (work === 'tampa') add('tampaBayCore', 5);
+    if (work === 'i4') {
+      add('orlandoCore', 3);
+      add('polkCounty', 4);
+      add('tampaBayCore', 3);
     }
-    if (questionId === 6 && selected.value === 'water') addPoints(['winterHaven', 'clermont', 'sanford', 'mountDora', 'lakeland'], 3, current);
-    if (questionId === 6 && selected.value === 'golf') addPoints(['lakewoodRanch', 'lakeNona', 'wesleyChapelNewTampa'], 3, current);
-    if (questionId === 6 && selected.value === 'downtown') addPoints(['winterParkMaitland', 'stPetersburg', 'southTampa', 'mountDora', 'sarasota'], 3, current);
-    if (questionId === 6 && selected.value === 'markets') addPoints(['plantCity', 'mountDora', 'winterGarden', 'lakeland'], 3, current);
-    if (questionId === 6 && selected.value === 'trails') addPoints(['clermont', 'sanford', 'landOLakes'], 3, current);
-    if (questionId === 6 && selected.value === 'quiet') addPoints(['lakeWales', 'lakeAlfred', 'grovelandMascotte', 'parrish'], 3, current);
-    if (questionId === 7 && selected.value === 'new') addPoints(['wesleyChapelNewTampa', 'riverview', 'parrish', 'horizonWest', 'grovelandMascotte', 'davenport'], 3, current);
-    if (questionId === 7 && selected.value === 'established') addPoints(['winterParkMaitland', 'southTampa', 'mountDora', 'sanford', 'celebration'], 3, current);
-    if (questionId === 7 && selected.value === 'value') addPoints(['lakeland', 'winterHaven', 'hainesCity', 'lakeWales', 'auburndale', 'kissimmeeStCloud', 'grovelandMascotte'], 3, current);
-    if (questionId === 8 && selected.value === 'full') addPoints(['lakewoodRanch', 'wesleyChapelNewTampa', 'lakeNona', 'horizonWest'], 3, current);
-    if (questionId === 8 && selected.value === 'none') addPoints(['plantCity', 'lakeWales', 'lakeAlfred', 'sanford', 'apopka'], 3, current);
-  };
+    if (work === 'remote') {
+      add('pinellasStPete', 2);
+      add('sarasotaLakewoodRanch', 2);
+    }
 
-  const handleStartQuiz = () => {
-    sendEvent('landing_start_quiz', {});
-    setStage('quiz');
-  };
+    const traffic = answerValues.q4_commute_tolerance;
+    if (traffic === 'under20') {
+      add('orlandoCore', 3);
+      add('tampaBayCore', 3);
+    }
+    if (traffic === '35to45' || traffic === 'noLimit') {
+      add('polkCounty', 3);
+      add('sarasotaLakewoodRanch', 2);
+    }
+
+    const themeParks = answerValues.q5_theme_park_relevance;
+    if (themeParks === 'mustHave') add('orlandoCore', 5);
+    if (themeParks === 'niceToHave') add('orlandoCore', 2);
+
+    const weekend = answerValues.q6_weekend_activity;
+    if (weekend === 'water') {
+      add('pinellasStPete', 4);
+      add('sarasotaLakewoodRanch', 3);
+      add('polkCounty', 1);
+    }
+    if (weekend === 'downtown') {
+      add('pinellasStPete', 3);
+      add('tampaBayCore', 2);
+      add('orlandoCore', 2);
+    }
+    if (weekend === 'quiet') add('polkCounty', 2);
+
+    const coastal = answerValues.q14_coastal_comfort;
+    if (coastal === 'high') {
+      add('pinellasStPete', 4);
+      add('sarasotaLakewoodRanch', 4);
+    }
+    if (coastal === 'low') {
+      add('orlandoCore', 2);
+      add('polkCounty', 3);
+    }
+
+    if (answerValues.q1_schools_importance === 'mustHave') {
+      add('orlandoCore', 3);
+      add('sarasotaLakewoodRanch', 2);
+      add('tampaBayCore', 2);
+    }
+
+    if (['500to650', '650to800', '800plus'].includes(answerValues.q11_budget)) {
+      add('orlandoCore', 2);
+      add('sarasotaLakewoodRanch', 2);
+    }
+
+    if (clarification === 'themeParks') add('orlandoCore', 4);
+    if (clarification === 'coastal') {
+      add('pinellasStPete', 3);
+      add('sarasotaLakewoodRanch', 3);
+    }
+
+    const opennessAllowed =
+      answerValues.q4_commute_tolerance === '35to45' ||
+      answerValues.q4_commute_tolerance === 'noLimit' ||
+      answerValues.q3_work_location === 'remote' ||
+      answerValues.q15_exploration_openness === 'openAnywhere';
+
+    const eligibleAreas = Object.entries(areaProfiles)
+      .filter(([, area]) => getBudgetAllowedAreas(budgetChoice).has(area.key))
+      .filter(([, area]) => filterBySize(area, sizeChoice))
+      .filter(([, area]) => filterByConstruction(area, constructionChoice)) as [AreaKey, (typeof areaProfiles)[AreaKey]][];
+
+    const rankedEcosystems = Object.entries(ecosystemScores)
+      .map(([key, score]) => ({ key: key as EcosystemKey, score }))
+      .sort((a, b) => b.score - a.score);
+
+    const primaryEcosystem = rankedEcosystems[0]?.key ?? 'orlandoCore';
+    const secondaryEcosystem = opennessAllowed ? rankedEcosystems[1]?.key : null;
+
+    const areaWeights = (areaKey: AreaKey) => {
+      const area = areaProfiles[areaKey];
+      let score = ecosystemScores[primaryEcosystem] * 2;
+      if (weekend === 'downtown' && area.downtownWalkable) score += 4;
+      if (weekend === 'water' && area.waterAccess === 'excellent') score += 4;
+      if (themeParks === 'mustHave' && area.nearAttractions) score += 4;
+      if (coastal === 'high' && ['stPetersburg', 'clearwater', 'sarasota', 'bradenton'].includes(areaKey)) score += 3;
+      if (answerValues.q1_schools_importance === 'mustHave' && ['A+', 'A', 'A-'].includes(area.schoolRating)) score += 3;
+      if (answerValues.q7_neighborhood_type === 'new' && (area.neighborhoodType === 'new' || area.neighborhoodType === 'mixed')) score += 2;
+      if (answerValues.q7_neighborhood_type === 'established' && (area.neighborhoodType === 'established' || area.neighborhoodType === 'mixed')) score += 2;
+      if (answerValues.q10_dining_preference === area.diningStyle) score += 2;
+      return score;
+    };
+
+    const primaryPool = ecosystemAreas[primaryEcosystem];
+    const topPrimaryAreas = eligibleAreas
+      .filter(([key]) => primaryPool.includes(key))
+      .filter(([key]) => !(answerValues.q3_work_location === 'orlando' && !['35to45', 'noLimit'].includes(answerValues.q4_commute_tolerance) && key === 'davenport'))
+      .map(([key, area]) => ({ area, score: areaWeights(key) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+
+    const secondaryAreas = secondaryEcosystem
+      ? eligibleAreas
+          .filter(([key]) => ecosystemAreas[secondaryEcosystem].includes(key))
+          .map(([key, area]) => ({ area, score: areaWeights(key) }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 2)
+      : [];
+
+    return { primaryEcosystem, secondaryEcosystem, topPrimaryAreas, secondaryAreas, opennessAllowed };
+  }, [answerValues, budgetChoice, clarification, constructionChoice, sizeChoice]);
+
 
   const handleSelectAnswer = (optionIndex: number) => {
     const selectedOption = currentQuestion.options[optionIndex];
-    if (questionIndex === 0) {
-      sendEvent('quiz_start', { questionId: currentQuestion.id });
-    }
+    if (questionIndex === 0) sendEvent('quiz_start', { questionId: currentQuestion.id });
     sendEvent('quiz_answer', { questionId: currentQuestion.id, value: selectedOption.value });
 
     const answerKey = questionToAnswerKey[currentQuestion.id];
     const nextAnswerValues = { ...answerValues, [answerKey]: selectedOption.value };
     setAnswerValues(nextAnswerValues);
 
-    setScores((current) => {
-      const next = { ...current };
-      scoreQuestion(currentQuestion.id, selectedOption, next);
-      return next;
-    });
-
     if (currentQuestion.id === 1) setSkipSchoolPriority(selectedOption.value === 'noKids');
-    if (currentQuestion.id === 3) setWorkPreference(selectedOption.value);
     if (selectedOption.budgetValue) setBudgetChoice(selectedOption.budgetValue);
     if (selectedOption.sizeValue) setSizeChoice(selectedOption.sizeValue);
     if (selectedOption.constructionValue) setConstructionChoice(selectedOption.constructionValue);
@@ -250,7 +278,8 @@ function App() {
     const nextQuestions = getActiveQuestions(currentQuestion.id === 1 ? selectedOption.value === 'noKids' : skipSchoolPriority);
     if (questionIndex === nextQuestions.length - 1) {
       sendEvent('quiz_complete', { answers: nextAnswerValues });
-      setStage('lead');
+      const hasLifestyleConflict = nextAnswerValues.q5_theme_park_relevance === 'mustHave' && nextAnswerValues.q14_coastal_comfort === 'high';
+      setStage(hasLifestyleConflict ? 'clarify' : 'lead');
       return;
     }
     setQuestionIndex((current) => current + 1);
@@ -259,9 +288,8 @@ function App() {
   const handleLeadSubmit = (form: LeadFormData) => {
     setLeadData(form);
     setStage('result');
-    sendEvent('lead_submit', { timeline: form.timeline, wantsCommunityInfo: form.wantsCommunityInfo });
 
-    const topMatches = rankedMatches.slice(0, 3).map((match) => ({
+    const topMatches = scoringResult.topPrimaryAreas.map((match) => ({
       area: match.area.title,
       region: match.area.region,
       score: match.score,
@@ -276,31 +304,31 @@ function App() {
     const tags = [
       'SRC_RelocationQuiz',
       `INT_Timeline_${formatTagValue(form.timeline)}`,
+      `PRIMARY_${formatTagValue(scoringResult.primaryEcosystem)}`,
+      ...(scoringResult.secondaryEcosystem ? [`SECONDARY_${formatTagValue(scoringResult.secondaryEcosystem)}`] : []),
       ...answerTags,
       ...topMatches.map((match) => `MATCH_${match.key}`),
       ...(form.wantsCommunityInfo ? ['OPT_CommunityInfo_Yes'] : [])
     ];
 
     const webhookUrl = import.meta.env.VITE_WEBHOOK_URL?.trim();
-    if (!webhookUrl) {
-      return;
-    }
+    if (!webhookUrl) return;
 
     const payload = {
       timestamp: new Date().toISOString(),
       source: 'morefla-relocation-quiz',
-      lead: {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        email: form.email,
-        phone: form.phone,
-        timeline: form.timeline,
-        wantsCommunityInfo: form.wantsCommunityInfo
-      },
+      lead: form,
       answers: answerValues,
       topMatches: topMatches.map(({ key, ...match }) => match),
       insights,
       tags,
+      results: {
+        primaryEcosystem: ecosystemLabels[scoringResult.primaryEcosystem],
+        secondaryEcosystem: scoringResult.secondaryEcosystem ? ecosystemLabels[scoringResult.secondaryEcosystem] : null,
+        topAreas: topMatches.map((match) => match.area),
+        trafficTolerance: answerValues.q4_commute_tolerance,
+        coastalComfortLevel: answerValues.q14_coastal_comfort
+      },
       metadata: {
         userAgent: window.navigator.userAgent,
         referrer: document.referrer,
@@ -314,29 +342,23 @@ function App() {
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
-    }).catch(() => {
-      // fire-and-forget by design
-    });
+    }).catch(() => {});
   };
 
   const restartQuiz = () => {
     setStage('landing');
     setQuestionIndex(0);
-    setScores(baseScores);
     setLeadData(null);
     setBudgetChoice('400to500');
     setSizeChoice(2000);
     setConstructionChoice('either');
     setInsights([]);
     setSkipSchoolPriority(false);
-    setWorkPreference('remote');
     setAnswerValues(defaultAnswerValues);
+    setClarification('');
   };
 
-  // If on landing page, show LandingPage component
-  if (stage === 'landing') {
-    return <LandingPage onStartQuiz={handleStartQuiz} />;
-  }
+  if (stage === 'landing') return <LandingPage onStartQuiz={() => setStage('quiz')} />;
 
   return (
     <div className="min-h-screen bg-sand">
@@ -351,13 +373,6 @@ function App() {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <div className="mb-6 rounded-xl border border-citrus/20 bg-citrus/5 px-4 py-3 text-center">
-          <h1 className="text-lg font-bold text-lagoon md:text-xl">Relocation Match Quiz</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Answer targeted questions to reveal your top 3 Florida area matches across 30+ local markets.
-          </p>
-        </div>
-
         {stage === 'quiz' && (
           <AnimatePresence mode="wait">
             <motion.div
@@ -372,11 +387,7 @@ function App() {
               <h2 className="mt-4 text-base font-semibold text-slate-800 md:text-lg">{currentQuestion.prompt}</h2>
               <div className="mt-4 space-y-2">
                 {currentQuestion.options.map((option, optionIndex) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleSelectAnswer(optionIndex)}
-                    className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-lagoon hover:bg-cyan-50"
-                  >
+                  <button key={option.value} onClick={() => handleSelectAnswer(optionIndex)} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:border-lagoon hover:bg-cyan-50">
                     {option.text}
                   </button>
                 ))}
@@ -385,18 +396,36 @@ function App() {
           </AnimatePresence>
         )}
 
+        {stage === 'clarify' && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card">
+            <h2 className="text-lg font-bold text-lagoon">Quick tie-breaker before your match results</h2>
+            <p className="mt-2 text-sm text-slate-600">You selected strong beach/coastal comfort and theme-park relevance. Which should we prioritize more for your primary ecosystem?</p>
+            <div className="mt-4 space-y-2">
+              <button onClick={() => { setClarification('themeParks'); setStage('lead'); }} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 hover:border-lagoon">Theme parks and attractions</button>
+              <button onClick={() => { setClarification('coastal'); setStage('lead'); }} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 hover:border-lagoon">Coastal and beach lifestyle</button>
+              <button onClick={() => { setClarification('balanced'); setStage('lead'); }} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-medium text-slate-700 hover:border-lagoon">Keep it balanced</button>
+            </div>
+          </div>
+        )}
+
         {stage === 'lead' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card md:p-6">
-            <h2 className="text-lg font-bold text-lagoon">You are one step away from your top 3 matches</h2>
-            <p className="mt-2 text-sm text-slate-600">
-              We scored your answers and filtered by budget, home size, and new-vs-resale fit. Share your info to unlock your ranked results.
-            </p>
+            <h2 className="text-lg font-bold text-lagoon">You are one step away from your ecosystem match</h2>
             <LeadCaptureForm onSubmit={handleLeadSubmit} />
           </motion.div>
         )}
 
         {stage === 'result' && leadData && (
-          <ResultsCard rankedMatches={rankedMatches} insights={insights} leadData={leadData} timeline={leadData.timeline} onRestart={restartQuiz} />
+          <ResultsCard
+            rankedMatches={scoringResult.topPrimaryAreas}
+            secondaryMatches={scoringResult.secondaryAreas}
+            primaryEcosystemLabel={ecosystemLabels[scoringResult.primaryEcosystem]}
+            secondaryEcosystemLabel={scoringResult.secondaryEcosystem ? ecosystemLabels[scoringResult.secondaryEcosystem] : null}
+            showSecondary={scoringResult.opennessAllowed}
+            insights={insights}
+            timeline={leadData.timeline}
+            onRestart={restartQuiz}
+          />
         )}
       </main>
     </div>

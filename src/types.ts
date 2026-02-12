@@ -35,6 +35,7 @@ export const AREA_KEYS = [
 ] as const;
 
 export type AreaKey = (typeof AREA_KEYS)[number];
+export type EcosystemKey = 'orlandoCore' | 'tampaBayCore' | 'pinellasStPete' | 'sarasotaLakewoodRanch' | 'polkCounty';
 
 export type BudgetBracket = 'under300' | '300to400' | '400to500' | '500to650' | '650to800' | '800plus';
 export type SizeNeed = 1500 | 2000 | 2500 | 3000;

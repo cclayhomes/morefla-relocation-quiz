@@ -1,4 +1,4 @@
-import { AreaKey, AreaProfile, BudgetBracket, QuizQuestion, SizeNeed } from '../types';
+import { AreaKey, AreaProfile, BudgetBracket, EcosystemKey, QuizQuestion, SizeNeed } from '../types';
 
 const defaults = {
   hasPrivateSchools: false,
@@ -81,10 +81,10 @@ export const questions: QuizQuestion[] = [
     { text: '35-45 minutes is okay', value: '35to45' },
     { text: "Commute doesn't matter", value: 'noLimit' }
   ] },
-  { id: 5, prompt: 'How often will friends and family visit you?', options: [
-    { text: 'Constantly - need guest space and attractions nearby', value: 'constantly', insight: 'You want visiting-friendly areas with attractions and convenience.' },
-    { text: 'A few times a year', value: 'few' },
-    { text: 'Rarely', value: 'rarely' }
+  { id: 5, prompt: 'How important are theme parks/major attractions to your lifestyle?', options: [
+    { text: 'Must-have for regular use or guests', value: 'mustHave', insight: 'Attractions and theme-park access are central to your location fit.' },
+    { text: 'Nice bonus, but not required', value: 'niceToHave' },
+    { text: 'Not important', value: 'notImportant' }
   ] },
   { id: 6, prompt: "What's your ideal weekend activity?", options: [
     { text: 'Boating, fishing, or water sports', value: 'water', insight: 'Water access and lake/coastal recreation are a major lifestyle fit.' },
@@ -134,6 +134,15 @@ export const questions: QuizQuestion[] = [
     { text: 'New construction only', value: 'new', constructionValue: 'new' },
     { text: 'Resale/established only', value: 'resale', constructionValue: 'resale' },
     { text: 'Either is fine', value: 'either', constructionValue: 'either' }
+  ] },
+  { id: 14, prompt: 'How comfortable are you with coastal hurricane exposure?', options: [
+    { text: 'Very comfortable with coastal living', value: 'high' },
+    { text: 'Some comfort, but prefer balance', value: 'medium' },
+    { text: 'Prefer inland / lower coastal risk', value: 'low', insight: 'You prefer inland ecosystems with less coastal exposure.' }
+  ] },
+  { id: 15, prompt: 'How open are you to exploring outside your primary metro?', options: [
+    { text: 'Open to exploring anywhere in Central/West Florida', value: 'openAnywhere' },
+    { text: 'Prefer one primary ecosystem only', value: 'primaryOnly' }
   ] }
 ];
 
@@ -164,3 +173,20 @@ export function filterByConstruction(area: AreaProfile, preference: 'new' | 'res
   if (preference === 'new') return area.constructionType === 'new' || area.constructionType === 'mixed';
   return area.constructionType === 'resale' || area.constructionType === 'mixed';
 }
+
+
+export const ecosystemLabels: Record<EcosystemKey, string> = {
+  orlandoCore: 'Orlando Core',
+  tampaBayCore: 'Tampa Bay Core',
+  pinellasStPete: 'Pinellas / St. Pete',
+  sarasotaLakewoodRanch: 'Sarasota / Lakewood Ranch',
+  polkCounty: 'Polk County'
+};
+
+export const ecosystemAreas: Record<EcosystemKey, AreaKey[]> = {
+  orlandoCore: ['lakeNona', 'horizonWest', 'celebration', 'winterGarden', 'windermere', 'clermont', 'davenport', 'kissimmeeStCloud', 'apopka'],
+  tampaBayCore: ['southTampa', 'wesleyChapelNewTampa', 'brandon', 'riverview', 'landOLakes'],
+  pinellasStPete: ['stPetersburg', 'clearwater'],
+  sarasotaLakewoodRanch: ['sarasota', 'lakewoodRanch', 'bradenton'],
+  polkCounty: ['lakeland', 'winterHaven', 'hainesCity', 'davenport']
+};
