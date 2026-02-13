@@ -78,7 +78,7 @@ export function LandingPage({ onStartQuiz }: LandingPageProps) {
           <div className="mt-10 flex flex-wrap items-center justify-center gap-6 text-sm text-slate-500">
             <div className="flex items-center gap-1">
               <span className="text-citrus">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
-              <span>5.0/5 (203 reviews)</span>
+              <span>5.0/5 (106 reviews)</span>
             </div>
             <div>4,750+ subscribers</div>
           </div>
