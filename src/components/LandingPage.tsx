@@ -34,17 +34,15 @@ export function LandingPage({ onStartQuiz }: LandingPageProps) {
             Answer 8 quick questions and get your Top 3 matches for Central Florida relocation.
           </p>
 
-          {/* Video embed placeholder */}
-          <div className="mx-auto mt-8 aspect-video max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-card">
-            {/* Replace the src below with your actual video embed URL */}
+          {/* Intro video */}
+          <div className="mx-auto mt-8 w-full max-w-xs overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-card sm:max-w-sm md:max-w-md">
             <iframe
-              className="h-full w-full"
-              src="about:blank"
+              className="h-auto w-full aspect-[9/16]"
+              src="https://www.youtube.com/embed/aq107hIvAvA"
               title="Relocation Quiz Intro"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
-            {/* Example: src="https://www.youtube.com/embed/YOUR_VIDEO_ID" */}
           </div>
 
           {/* CTA */}
